@@ -21,8 +21,6 @@ def install():
                   tearOff=True,
                   parent="MayaWindow")
 
-        cmds.menuItem(divider=True)
-
         # Modeling sub-menu
         cmds.menuItem("Modeling",
                       label="Modeling",
