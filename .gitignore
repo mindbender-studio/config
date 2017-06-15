@@ -1,0 +1,9 @@
+*.egg-info
+dist
+cover
+.coverage
+stage
+shared
+_site
+*.pyc
+*.bat
