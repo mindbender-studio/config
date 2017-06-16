@@ -4,10 +4,6 @@ from mindbender.vendor.Qt import QtWidgets, QtCore
 
 self = sys.modules[__name__]
 self._menu = "polly"
-self._parent = {
-    widget.objectName(): widget
-    for widget in QtWidgets.QApplication.topLevelWidgets()
-}.get("MayaWindow")
 
 
 def install():
