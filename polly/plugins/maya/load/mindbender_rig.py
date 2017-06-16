@@ -24,6 +24,7 @@ class RigLoader(api.Loader):
         self[:] = nodes
 
     def post_process(self, name, namespace, context):
+        import os
         from mindbender import maya
 
         # TODO(marcus): We are hardcoding the name "out_SET" here.
@@ -46,10 +47,13 @@ class RigLoader(api.Loader):
             dependencies = [context["representation"]["_id"]]
             asset = context["asset"]["name"] + "_"
 
-            # TODO(marcus): Hardcoding the family here, better separate this.
             maya.create(
                 name=maya.unique_name(asset, suffix="_SET"),
-                asset=context["asset"]["name"],
+
+                # Publish to the currently set asset, and not the
+                # asset from which the Rig was produced.
+                asset=os.environ["MINDBENDER_ASSET"],
+
                 family="mindbender.animation",
                 options={"useSelection": True},
                 data={
