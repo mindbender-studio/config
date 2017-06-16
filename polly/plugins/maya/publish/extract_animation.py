@@ -50,22 +50,23 @@ class ExtractMindbenderAnimation(pyblish.api.InstancePlugin):
             nodes = list(instance)
 
         self.log.info("nodes: %s" % str(nodes))
-        maya.export_alembic(
-            nodes=nodes,
-            file=os.path.join(dirname, filename).replace("\\", "/"),
+        with maya.suspended_refresh():
+            maya.export_alembic(
+                nodes=nodes,
+                file=os.path.join(dirname, filename).replace("\\", "/"),
 
-            frame_range=(instance.data["startFrame"],
-                         instance.data["endFrame"]),
+                frame_range=(instance.data["startFrame"],
+                             instance.data["endFrame"]),
 
-            # Include UVs
-            write_uv=True,
+                # Include UVs
+                write_uv=True,
 
-            # Include Visibility
-            write_visibility=True,
+                # Include Visibility
+                write_visibility=True,
 
-            # Include all attributes prefixed with this
-            attribute_prefix="mb"
-        )
+                # Include all attributes prefixed with this
+                attribute_prefix="mb"
+            )
 
         # Store reference for integration
         if "files" not in instance.data:
