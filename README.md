@@ -1,3 +1,11 @@
-# Pipeline Resources
+![polly](https://user-images.githubusercontent.com/2152766/27192647-0d2c806c-51f4-11e7-9827-ee95051318c8.png)
 
-This repository includes all external customisation made to [core](https://github.com/mindbender-studio/core), including software initialisation and application plug-ins.
+# Polly
+
+The Mindbender configuration.
+
+<br>
+
+### Description
+
+This project implements the studio specific workflow artists use at [Mindbender](mindbender.com).
