@@ -48,6 +48,10 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         SILO = os.environ["MINDBENDER_SILO"]
         LOCATION = os.getenv("MINDBENDER_LOCATION")
 
+        representation_lables = {".ma": "Maya Ascii",
+                                 ".source": "Original source file",
+                                 ".abc": "Alembic"}
+
         context = instance.context
         # Atomicity
         #
@@ -102,49 +106,16 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
 
             subset = io.find_one({"_id": _id})
 
+        # get next version
         latest_version = io.find_one({"type": "version",
                                       "parent": subset["_id"]},
                                      {"name": True},
                                      sort={"name": -1})
         next_version = latest_version["name"] + 1 or 1
 
-        # versiondir = template_versions.format(**template_data)
         self.log.debug("Next version: %i" % next_version)
 
-        version = {
-            "schema": "mindbender-core:version-2.0",
-            "type": "version",
-            "parent": subset["_id"],
-            "name": next_version,
-
-            # Imprint currently registered location
-            "locations": list(
-                location for location in
-                [LOCATION]
-                if location is not None
-            ),
-
-            "data": dict(instance.data, **{
-                # Used to identify family of assets already on disk
-                "families": instance.data.get("families", list()) + [
-                    instance.data.get("family")
-                ],
-
-                "time": context.data["time"],
-                "author": context.data["user"],
-
-                "source": os.path.join(
-                    "{root}",
-                    os.path.relpath(
-                        context.data["currentFile"],
-                        api.registered_root()
-                    )
-                ).replace("\\", "/"),
-
-                "comment": context.data.get("comment"),
-            })
-        }
-
+        version = self.create_version(subset, next_version, LOCATION)
         self.backwards_compatiblity(instance, subset, version)
 
         self.log.debug("Creating version: %s" % pformat(version))
@@ -202,17 +173,9 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
                 "type": "representation",
                 "parent": version_id,
                 "name": ext[1:],
-                "data": {
-                    "label": {
-                        ".ma": "Maya Ascii",
-                        ".source": "Original source file",
-                        ".abc": "Alembic"
-                    }.get(ext)
-                },
+                "data": {"label": representation_lables.get(ext)},
 
-                "dependencies": instance.data.get(
-                    "dependencies", ""
-                ).split(),
+                "dependencies": instance.data.get("dependencies", "").split(),
 
                 # Imprint shortcut to context
                 # for performance reasons.
@@ -230,6 +193,36 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
 
         self.log.info("Successfully integrated \"%s\" to \"%s\"" % (
             instance, dst))
+
+    def create_version(self, subset, version_number, locations):
+
+        # Imprint currently registered location
+        version_locations = [location for location in locations if
+                             location is not None]
+
+        return {"schema": "mindbender-core:version-2.0",
+                "type": "version",
+                "parent": subset["_id"],
+                "name": version_number,
+                "locations": version_locations,
+                "data": None}
+
+    def create_data(self, context, instance):
+
+        current_families = instance.data.get("families", list())
+        families = current_families.append(instance.data.get("family"))
+
+        # create relative source path for DB
+        relative_path = os.path.relpath(context.data["currentFile"],
+                                        api.registered_root())
+        source = os.path.join("{root}", relative_path).replace("\\", "/")
+
+        return {instance.data: {"families": families,
+                                "time": context.data["time"],
+                                "author": context.data["user"],
+                                "source": source,
+                                "comment": context.data.get("comment")
+                                }}
 
     def backwards_compatiblity(self, instance, subset, version):
         """Maintain backwards compatibility with newly published assets
