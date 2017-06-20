@@ -44,9 +44,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         
         # Required environment variables
         PROJECT = os.environ["MINDBENDER_PROJECT"]
-        ASSET = (
-            instance.data.get("asset") or os.environ["MINDBENDER_ASSET"]
-        )
+        ASSET = instance.data.get("asset") or os.environ["MINDBENDER_ASSET"]
         SILO = os.environ["MINDBENDER_SILO"]
         LOCATION = os.getenv("MINDBENDER_LOCATION")
 
@@ -74,11 +72,8 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         #       |
         #
         stagingdir = instance.data.get("stagingDir")
-        assert stagingdir, (
-            "Incomplete instance \"%s\": "
-            "Missing reference to staging area."
-            % instance
-        )
+        assert stagingdir, ("Incomplete instance \"%s\": "
+                            "Missing reference to staging area." % instance)
 
         self.log.debug("Establishing staging directory @ %s" % stagingdir)
 
@@ -107,15 +102,11 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
 
             subset = io.find_one({"_id": _id})
 
-        all_versions = [0] + [
-            version["name"]
-            for version in io.find({
-                "type": "version",
-                "parent": subset["_id"]
-            }, {"name": True})
-        ]
-
-        next_version = sorted(all_versions)[-1] + 1
+        latest_version = io.find_one({"type": "version",
+                                      "parent": subset["_id"]},
+                                     {"name": True},
+                                     sort={"name": -1})
+        next_version = latest_version["name"] + 1 or 1
 
         # versiondir = template_versions.format(**template_data)
         self.log.debug("Next version: %i" % next_version)
