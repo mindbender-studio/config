@@ -204,6 +204,15 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
                 "data": None}
 
     def create_data(self, context, instance):
+        """
+        Create the data colllection for th verison
+        Args:
+            context (object): the current context
+            instance(object): the current instance being published
+
+        Returns:
+            dict: the required information with instance.data as key
+        """
 
         current_families = instance.data.get("families", list())
         families = current_families.append(instance.data.get("family"))
@@ -226,6 +235,8 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         Arguments:
             src (str): the source file which needs to be copied
             dst (str): the destination of the sourc file
+        Returns:
+            None
         """
 
         dirname = os.path.dirname(dst)
