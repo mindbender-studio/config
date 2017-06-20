@@ -115,7 +115,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         self.log.debug("Next version: %i" % next_version)
 
         version = self.create_version(subset, next_version, [LOCATION])
-        version["data"] = self.create_data(context, instance)
+        version["data"] = self.create_version_data(context, instance)
 
         self.backwards_compatiblity(instance, subset, version)
 
@@ -203,7 +203,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
                 "locations": version_locations,
                 "data": None}
 
-    def create_data(self, context, instance):
+    def create_version_data(self, context, instance):
         """
         Create the data colllection for th verison
         Args:
