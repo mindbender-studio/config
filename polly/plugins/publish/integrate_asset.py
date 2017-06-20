@@ -41,7 +41,6 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
     ]
 
     def process(self, instance):
-        
         # Required environment variables
         PROJECT = os.environ["MINDBENDER_PROJECT"]
         ASSET = instance.data.get("asset") or os.environ["MINDBENDER_ASSET"]
@@ -93,13 +92,13 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         })
 
         if subset is None:
-            self.log.info("Subset '%s' not found, creating.."
-                          % instance.data["subset"])
+            subset_name = instance.data["subset"]
+            self.log.info("Subset '%s' not found, creating.." % subset_name)
 
             _id = io.insert_one({
                 "schema": "mindbender-core:subset-2.0",
                 "type": "subset",
-                "name": instance.data["subset"],
+                "name": subset_name,
                 "data": {},
                 "parent": asset["_id"]
             }).inserted_id
@@ -115,7 +114,9 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
 
         self.log.debug("Next version: %i" % next_version)
 
-        version = self.create_version(subset, next_version, LOCATION)
+        version = self.create_version(subset, next_version, [LOCATION])
+        version["data"] = self.create_data(context, instance)
+
         self.backwards_compatiblity(instance, subset, version)
 
         self.log.debug("Creating version: %s" % pformat(version))
@@ -156,17 +157,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
 
             self.log.info("Copying %s -> %s" % (src, dst))
 
-            dirname = os.path.dirname(dst)
-            try:
-                os.makedirs(dirname)
-            except OSError as e:
-                if e.errno == errno.EEXIST:
-                    pass
-                else:
-                    self.log.critical("An unexpected error occurred.")
-                    raise
-
-            shutil.copy(src, dst)
+            self.copy_source(src, dst)
 
             representation = {
                 "schema": "mindbender-core:representation-2.0",
@@ -174,7 +165,6 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
                 "parent": version_id,
                 "name": ext[1:],
                 "data": {"label": representation_lables.get(ext)},
-
                 "dependencies": instance.data.get("dependencies", "").split(),
 
                 # Imprint shortcut to context
@@ -195,7 +185,13 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
             instance, dst))
 
     def create_version(self, subset, version_number, locations):
+        """ Copy given source to destination
 
+        Arguments:
+            subset (dict): the registered subset of the asset
+            version_number (int): the version number
+            locations (list): the currently registered locations
+        """
         # Imprint currently registered location
         version_locations = [location for location in locations if
                              location is not None]
@@ -223,6 +219,26 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
                                 "source": source,
                                 "comment": context.data.get("comment")
                                 }}
+
+    def copy_source(self, src, dst):
+        """ Copy given source to destination
+
+        Arguments:
+            src (str): the source file which needs to be copied
+            dst (str): the destination of the sourc file
+        """
+
+        dirname = os.path.dirname(dst)
+        try:
+            os.makedirs(dirname)
+        except OSError as e:
+            if e.errno == errno.EEXIST:
+                pass
+            else:
+                self.log.critical("An unexpected error occurred.")
+                raise
+
+        shutil.copy(src, dst)
 
     def backwards_compatiblity(self, instance, subset, version):
         """Maintain backwards compatibility with newly published assets
