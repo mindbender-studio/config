@@ -1,4 +1,10 @@
+import os
+import errno
+import shutil
+from pprint import pformat
+
 import pyblish.api
+from mindbender import api, io
 
 
 class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
@@ -35,20 +41,14 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
     ]
 
     def process(self, instance):
-        import os
-        import errno
-        import shutil
-        from pprint import pformat
-
-        from mindbender import api, io
-
+        
         # Required environment variables
-        MINDBENDER_PROJECT = os.environ["MINDBENDER_PROJECT"]
-        MINDBENDER_ASSET = (
+        PROJECT = os.environ["MINDBENDER_PROJECT"]
+        ASSET = (
             instance.data.get("asset") or os.environ["MINDBENDER_ASSET"]
         )
-        MINDBENDER_SILO = os.environ["MINDBENDER_SILO"]
-        MINDBENDER_LOCATION = os.getenv("MINDBENDER_LOCATION")
+        SILO = os.environ["MINDBENDER_SILO"]
+        LOCATION = os.getenv("MINDBENDER_LOCATION")
 
         context = instance.context
         # Atomicity
@@ -83,7 +83,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         self.log.debug("Establishing staging directory @ %s" % stagingdir)
 
         project = io.find_one({"type": "project"})
-        asset = io.find_one({"name": MINDBENDER_ASSET})
+        asset = io.find_one({"name": ASSET})
 
         assert all([project, asset]), "This is bug"
 
@@ -129,7 +129,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
             # Imprint currently registered location
             "locations": list(
                 location for location in
-                [MINDBENDER_LOCATION]
+                [LOCATION]
                 if location is not None
             ),
 
@@ -171,9 +171,9 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         #
         template_data = {
             "root": api.registered_root(),
-            "project": MINDBENDER_PROJECT,
-            "silo": MINDBENDER_SILO,
-            "asset": MINDBENDER_ASSET,
+            "project": PROJECT,
+            "silo": SILO,
+            "asset": ASSET,
             "subset": subset["name"],
             "version": version["name"],
         }
@@ -226,9 +226,9 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
                 # Imprint shortcut to context
                 # for performance reasons.
                 "context": {
-                    "project": MINDBENDER_PROJECT,
-                    "asset": MINDBENDER_ASSET,
-                    "silo": MINDBENDER_SILO,
+                    "project": PROJECT,
+                    "asset": ASSET,
+                    "silo": SILO,
                     "subset": subset["name"],
                     "version": version["name"],
                     "representation": ext[1:]
