@@ -1,8 +1,8 @@
 import os
 
-import pyblish.api
-
 from maya import cmds
+
+import pyblish.api
 
 
 class CollectMayaCurrentFile(pyblish.api.ContextPlugin):

@@ -37,7 +37,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         "mindbender.animation",
         "mindbender.lookdev",
         "mindbender.historyLookdev",
-        "mindbender.group",
+        "mindbender.group"
     ]
 
     def process(self, instance):
@@ -47,7 +47,8 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         SILO = os.environ["MINDBENDER_SILO"]
         LOCATION = os.getenv("MINDBENDER_LOCATION")
 
-        representation_lables = {".ma": "Maya Ascii",
+        # todo(marcus): avoid hardcoding labels in the integrator
+        representation_labels = {".ma": "Maya Ascii",
                                  ".source": "Original source file",
                                  ".abc": "Alembic"}
 
@@ -109,8 +110,11 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         latest_version = io.find_one({"type": "version",
                                       "parent": subset["_id"]},
                                      {"name": True},
-                                     sort={"name": -1})
-        next_version = latest_version["name"] + 1 or 1
+                                     sort=[("name", -1)])
+
+        next_version = 1
+        if latest_version is not None:
+            next_version += latest_version["name"]
 
         self.log.debug("Next version: %i" % next_version)
 
@@ -164,7 +168,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
                 "type": "representation",
                 "parent": version_id,
                 "name": ext[1:],
-                "data": {"label": representation_lables.get(ext)},
+                "data": {"label": representation_labels.get(ext)},
                 "dependencies": instance.data.get("dependencies", "").split(),
 
                 # Imprint shortcut to context
@@ -215,19 +219,25 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         """
 
         current_families = instance.data.get("families", list())
-        families = current_families.append(instance.data.get("family"))
+
+        instance_family = instance.data.get("family", None)
+        if current_families:
+            families += current_families
+        if instance_family is not None:
+            families.append(instance_family)
 
         # create relative source path for DB
         relative_path = os.path.relpath(context.data["currentFile"],
                                         api.registered_root())
         source = os.path.join("{root}", relative_path).replace("\\", "/")
 
-        return {instance.data: {"families": families,
-                                "time": context.data["time"],
-                                "author": context.data["user"],
-                                "source": source,
-                                "comment": context.data.get("comment")
-                                }}
+        version_data = {"families": families,
+                        "time": context.data["time"],
+                        "author": context.data["user"],
+                        "source": source,
+                        "comment": context.data.get("comment")}
+
+        return dict(instance.data, **version_data)
 
     def copy_source(self, src, dst):
         """ Copy given source to destination
@@ -262,10 +272,6 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         This behaviour is deprecated and is to be removed in a future release.
 
         """
-
-        import os
-        import json
-        import errno
         from mindbender import api
 
         MINDBENDER_PROJECT = os.environ["MINDBENDER_PROJECT"]
