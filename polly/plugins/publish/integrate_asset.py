@@ -116,8 +116,11 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
 
         self.log.debug("Next version: %i" % next_version)
 
-        version = self.create_version(subset, next_version, [LOCATION])
-        version["data"] = self.create_version_data(context, instance)
+        version_data = self.create_version_data(context, instance)
+        version = self.create_version(subset,
+                                      next_version,
+                                      [LOCATION],
+                                      version_data)
 
         self.backwards_compatiblity(instance, subset, version)
 
@@ -187,7 +190,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         self.log.info("Successfully integrated \"%s\" to \"%s\"" % (
             instance, dst))
 
-    def create_version(self, subset, version_number, locations):
+    def create_version(self, subset, version_number, locations, data=None):
         """ Copy given source to destination
 
         Arguments:
@@ -204,7 +207,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
                 "parent": subset["_id"],
                 "name": version_number,
                 "locations": version_locations,
-                "data": None}
+                "data": data}
 
     def create_version_data(self, context, instance):
         """
