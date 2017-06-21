@@ -86,11 +86,9 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
 
         assert all([project, asset]), "This is bug"
 
-        subset = io.find_one({
-            "type": "subset",
-            "parent": asset["_id"],
-            "name": instance.data["subset"]
-        })
+        subset = io.find_one({"type": "subset",
+                              "parent": asset["_id"],
+                              "name": instance.data["subset"]})
 
         if subset is None:
             subset_name = instance.data["subset"]
@@ -161,7 +159,8 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
 
             self.log.info("Copying %s -> %s" % (src, dst))
 
-            self.copy_source(src, dst)
+            # copy source to destination (library)
+            self.copy_file(src, dst)
 
             representation = {
                 "schema": "mindbender-core:representation-2.0",
@@ -209,7 +208,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
 
     def create_version_data(self, context, instance):
         """
-        Create the data colllection for th verison
+        Create the data collection for th version
         Args:
             context (object): the current context
             instance(object): the current instance being published
@@ -218,11 +217,11 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
             dict: the required information with instance.data as key
         """
 
+        families = []
         current_families = instance.data.get("families", list())
-
         instance_family = instance.data.get("family", None)
-        if current_families:
-            families += current_families
+
+        families += current_families
         if instance_family is not None:
             families.append(instance_family)
 
@@ -239,7 +238,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
 
         return dict(instance.data, **version_data)
 
-    def copy_source(self, src, dst):
+    def copy_file(self, src, dst):
         """ Copy given source to destination
 
         Arguments:
