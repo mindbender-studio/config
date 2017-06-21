@@ -84,7 +84,8 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         project = io.find_one({"type": "project"})
         asset = io.find_one({"name": ASSET})
 
-        assert all([project, asset]), "This is bug"
+        assert all([project, asset]), ("Could not find current project or "
+                                       "asset '%s'" % ASSET)
 
         subset = io.find_one({"type": "subset",
                               "parent": asset["_id"],
@@ -117,10 +118,10 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         self.log.debug("Next version: %i" % next_version)
 
         version_data = self.create_version_data(context, instance)
-        version = self.create_version(subset,
-                                      next_version,
-                                      [LOCATION],
-                                      version_data)
+        version = self.create_version(subset=subset,
+                                      version_number=next_version,
+                                      locations=[LOCATION],
+                                      data=version_data)
 
         self.backwards_compatiblity(instance, subset, version)
 
