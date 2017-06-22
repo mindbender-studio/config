@@ -9,29 +9,6 @@ class ValidateCurrentSaveFile(pyblish.api.ContextPlugin):
     hosts = ["maya", "houdini"]
 
     def process(self, context):
-
-        def houdini(variable):
-            resitem = []
-            for item in variable.split("\\"):
-                resitem.append(str(item))
-            resitem.reverse()
-            return resitem[0]
-
         current_file = context.data["currentFile"]
-
-        if "houdini" in pyblish.api.registered_hosts():
-            current_file = houdini(current_file)
-
-        unsaved_values = [
-            # An unsaved file in Maya has this value.
-            ".",
-            # An unsaved file in Nuke has this value.
-            "Root",
-            # An unsaved file in Houdini has this value.
-            "untitled.hip"
-        ]
-
-        is_saved = current_file not in unsaved_values
-
-        assert is_saved, (
-            "You haven't saved your file yet")
+        if not current_file:
+            raise RuntimeError("File not saved")

@@ -7,3 +7,6 @@ shared
 _site
 *.pyc
 *.bat
+
+# pycharm idea folder
+/.idea
