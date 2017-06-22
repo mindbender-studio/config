@@ -1,7 +1,7 @@
 import pyblish.api
 
 
-class ValidateMindbenderModelHierarchy(pyblish.api.InstancePlugin):
+class ValidateAvalonModelHierarchy(pyblish.api.InstancePlugin):
     """A model hierarchy must reside under a single assembly called "ROOT"
 
     - Must reside within `ROOT` transform

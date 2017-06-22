@@ -10,9 +10,9 @@ services:
   - docker
 
 install:
-  - git clone https://github.com/mindbender-studio/core.git
-  - docker run --name mindbender-mongo -d mongo
-  - docker build -t pyblish/mindbender -f Dockerfile-maya2016 .
+  - git clone https://github.com/avalon-studio/core.git
+  - docker run --name avalon-mongo -d mongo
+  - docker build -t pyblish/avalon -f Dockerfile-maya2016 .
 
 script:
   - >
@@ -20,8 +20,8 @@ script:
     docker run
     --rm
     -v $(pwd):/workspace
-    --link mindbender-mongo:mongo
+    --link avalon-mongo:mongo
     -e COVERALLS_REPO_TOKEN
     -e TRAVIS_JOB_ID
-    -e MINDBENDER_MONGO=mongodb://mongo:27017
-    pyblish/mindbender
+    -e AVALON_MONGO=mongodb://mongo:27017
+    pyblish/avalon

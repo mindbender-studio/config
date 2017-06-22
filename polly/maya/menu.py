@@ -1,6 +1,6 @@
 import sys
 from maya import cmds
-from mindbender.vendor.Qt import QtWidgets, QtCore
+from avalon.vendor.Qt import QtWidgets, QtCore
 
 self = sys.modules[__name__]
 self._menu = "polly"

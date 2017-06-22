@@ -1,4 +1,4 @@
-from mindbender import maya
+from avalon import maya
 
 
 class CreateLookdev(maya.Creator):

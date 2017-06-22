@@ -1,13 +1,14 @@
 import os
+import json
 import errno
 import shutil
 from pprint import pformat
 
 import pyblish.api
-from mindbender import api, io
+from avalon import api, io
 
 
-class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
+class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
     """Write to files and metadata
 
     This plug-in exposes your data to others by encapsulating it
@@ -29,7 +30,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
 
     """
 
-    label = "Integrate Mindbender Asset"
+    label = "Integrate Avalon Asset"
     order = pyblish.api.IntegratorOrder
     families = [
         "mindbender.model",
@@ -42,10 +43,10 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
 
     def process(self, instance):
         # Required environment variables
-        PROJECT = os.environ["MINDBENDER_PROJECT"]
-        ASSET = instance.data.get("asset") or os.environ["MINDBENDER_ASSET"]
-        SILO = os.environ["MINDBENDER_SILO"]
-        LOCATION = os.getenv("MINDBENDER_LOCATION")
+        PROJECT = os.environ["AVALON_PROJECT"]
+        ASSET = instance.data.get("asset") or os.environ["AVALON_ASSET"]
+        SILO = os.environ["AVALON_SILO"]
+        LOCATION = os.getenv("AVALON_LOCATION")
 
         # todo(marcus): avoid hardcoding labels in the integrator
         representation_labels = {".ma": "Maya Ascii",
@@ -96,7 +97,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
             self.log.info("Subset '%s' not found, creating.." % subset_name)
 
             _id = io.insert_one({
-                "schema": "mindbender-core:subset-2.0",
+                "schema": "avalon-core:subset-2.0",
                 "type": "subset",
                 "name": subset_name,
                 "data": {},
@@ -167,7 +168,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
             self.copy_file(src, dst)
 
             representation = {
-                "schema": "mindbender-core:representation-2.0",
+                "schema": "avalon-core:representation-2.0",
                 "type": "representation",
                 "parent": version_id,
                 "name": ext[1:],
@@ -203,7 +204,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         version_locations = [location for location in locations if
                              location is not None]
 
-        return {"schema": "mindbender-core:version-2.0",
+        return {"schema": "avalon-core:version-2.0",
                 "type": "version",
                 "parent": subset["_id"],
                 "name": version_number,
@@ -275,11 +276,11 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         This behaviour is deprecated and is to be removed in a future release.
 
         """
-        from mindbender import api
+        from avalon import api
 
-        MINDBENDER_PROJECT = os.environ["MINDBENDER_PROJECT"]
-        MINDBENDER_ASSET = os.environ["MINDBENDER_ASSET"]
-        MINDBENDER_SILO = os.environ["MINDBENDER_SILO"]
+        AVALON_PROJECT = os.environ["AVALON_PROJECT"]
+        AVALON_ASSET = os.environ["AVALON_ASSET"]
+        AVALON_SILO = os.environ["AVALON_SILO"]
 
         context = instance.context
 
@@ -295,7 +296,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
         stagingdir = instance.data.get("stagingDir")
         fname = os.path.join(stagingdir, ".metadata.json")
 
-        root = os.environ["MINDBENDER_ASSETPATH"]
+        root = os.environ["AVALON_ASSETPATH"]
         instancedir = os.path.join(root, "publish", instance.data["subset"])
 
         try:
@@ -316,7 +317,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
 
         except IOError:
             version_1_0 = dict(version, **{
-                "schema": "mindbender-core:version-1.0",
+                "schema": "avalon-core:version-1.0",
 
                 # Hard-coded during transition
                 "path": versiondir.replace("\\", "/"),
@@ -334,7 +335,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
                 "author": context.data["user"],
 
                 # Record within which silo this asset was made.
-                "silo": os.environ["MINDBENDER_SILO"],
+                "silo": os.environ["AVALON_SILO"],
 
                 # Collected by pyblish-maya
                 "source": os.path.join(
@@ -343,7 +344,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
                         context.data["currentFile"],
                         os.path.join(
                             api.registered_root(),
-                            os.environ["MINDBENDER_PROJECT"]
+                            os.environ["AVALON_PROJECT"]
                         )
                     )
                 ).replace("\\", "/"),
@@ -356,7 +357,7 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
             name, ext = os.path.splitext(filename)
             version_1_0["representations"].append(
                 {
-                    "schema": "mindbender-core:representation-1.0",
+                    "schema": "avalon-core:representation-1.0",
                     "format": ext,
                     "path": os.path.join(
                         "{dirname}",
@@ -366,9 +367,9 @@ class IntegrateMindbenderAsset(pyblish.api.InstancePlugin):
                     # Imprint shortcut to context
                     # for performance reasons.
                     "context": {
-                        "project": MINDBENDER_PROJECT,
-                        "asset": MINDBENDER_ASSET,
-                        "silo": MINDBENDER_SILO,
+                        "project": AVALON_PROJECT,
+                        "asset": AVALON_ASSET,
+                        "silo": AVALON_SILO,
                         "subset": subset["name"],
                         "version": version["name"],
                         "representation": ext[1:]

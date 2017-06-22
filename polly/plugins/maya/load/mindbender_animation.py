@@ -1,4 +1,4 @@
-from mindbender import api
+from avalon import api
 
 
 class AbcLoader(api.Loader):
@@ -37,7 +37,7 @@ class CurvesLoader(api.Loader):
 
     def process(self, name, namespace, context):
         from maya import cmds
-        from mindbender import maya
+        from avalon import maya
 
         cmds.loadPlugin("atomImportExport.mll", quiet=True)
 
@@ -97,10 +97,10 @@ class CurvesLoader(api.Loader):
     def post_process(self, name, namespace, context):
         import os
         from maya import cmds
-        from mindbender import maya, io
+        from avalon import maya, io
 
         # Task-dependent post-process
-        if os.getenv("MINDBENDER_TASK") != "animate":
+        if os.getenv("AVALON_TASK") != "animate":
             return self.log.info(
                 "No animation instance created due to task != animate"
             )

@@ -1,7 +1,7 @@
 import pyblish.api
 
 
-class ExtractMindbenderAnimation(pyblish.api.InstancePlugin):
+class ExtractAvalonAnimation(pyblish.api.InstancePlugin):
     """Produce an alembic of just point positions and normals.
 
     Positions and normals are preserved, but nothing more,
@@ -12,7 +12,7 @@ class ExtractMindbenderAnimation(pyblish.api.InstancePlugin):
 
     """
 
-    label = "Extract Mindbender Animation"
+    label = "Extract Avalon Animation"
     order = pyblish.api.ExtractorOrder
     hosts = ["maya"]
     families = ["mindbender.animation"]
@@ -20,7 +20,7 @@ class ExtractMindbenderAnimation(pyblish.api.InstancePlugin):
     def process(self, instance):
         import os
         from maya import cmds
-        from mindbender import api, maya
+        from avalon import api, maya
 
         self.log.debug("Loading plug-in..")
         cmds.loadPlugin("AbcExport.mll", quiet=True)

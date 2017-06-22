@@ -2,10 +2,10 @@
 
 # Polly
 
-The Mindbender configuration.
+The Mindbender configuration of Avalon.
 
 <br>
 
 ### Description
 
-This project implements the studio specific workflow artists use at [Mindbender](mindbender.com).
+This project implements the studio specific workflow artists use at [Avalon](avalon.com).

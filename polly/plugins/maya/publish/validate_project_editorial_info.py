@@ -2,7 +2,7 @@
 import pyblish.api
 
 
-class ValidateMindbenderProjectEditInfo(pyblish.api.ContextPlugin):
+class ValidateAvalonProjectEditInfo(pyblish.api.ContextPlugin):
     """Checks your scene with editorial info
 
     All the info that gets validated has been set by the projects bat files.
@@ -36,9 +36,9 @@ class ValidateMindbenderProjectEditInfo(pyblish.api.ContextPlugin):
 
         env = context.data.get("environment", dict())
 
-        valid_fps = env.get("mindbenderFps")
-        valid_edit_in = env.get("mindbenderEditIn")
-        valid_edit_out = env.get("mindbenderEditOut")
+        valid_fps = env.get("avalonFps")
+        valid_edit_in = env.get("avalonEditIn")
+        valid_edit_out = env.get("avalonEditOut")
 
         skip_on_none = [valid_fps, valid_edit_in, valid_edit_out]
 

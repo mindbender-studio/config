@@ -1,7 +1,7 @@
 import pyblish.api
 
 
-class ValidateMindbenderFrameRange(pyblish.api.InstancePlugin):
+class ValidateAvalonFrameRange(pyblish.api.InstancePlugin):
     """Animation should normally be published with the range for a shot"""
 
     label = "Validate Frame Range"
@@ -19,8 +19,8 @@ class ValidateMindbenderFrameRange(pyblish.api.InstancePlugin):
         instance_out = str(int(instance.data["endFrame"]))
 
         try:
-            global_in = os.environ["MINDBENDER_EDIT_IN"]
-            global_out = os.environ["MINDBENDER_EDIT_OUT"]
+            global_in = os.environ["AVALON_EDIT_IN"]
+            global_out = os.environ["AVALON_EDIT_OUT"]
         except KeyError:
             return self.log.info("No edit information available.")
 

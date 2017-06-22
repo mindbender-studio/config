@@ -1,18 +1,18 @@
 import pyblish.api
 
 
-class CollectMindbenderInstances(pyblish.api.ContextPlugin):
+class CollectAvalonInstances(pyblish.api.ContextPlugin):
     """Gather instances by objectSet and pre-defined attribute
 
     This collector takes into account assets that are associated with
     an objectSet and marked with a unique identifier;
 
     Identifier:
-        id (str): "pyblish.mindbender.instance"
+        id (str): "pyblish.avalon.instance"
 
     Supported Families:
         mindbender.model: Geometric representation of artwork
-        mindbender.rig: An articulated model for animators.
+        avalon.rig: An articulated model for animators.
             A rig may contain a series of sets in which to identify
             its contents.
 
@@ -25,7 +25,7 @@ class CollectMindbenderInstances(pyblish.api.ContextPlugin):
                 - One (1) rig per scene file
                 - Unmanaged history, it is up to the TD to ensure
                     history is up to par.
-        mindbender.animation: Pointcache of `mindbender.rig`
+        mindbender.animation: Pointcache of `avalon.rig`
 
     Limitations:
         - Does not take into account nodes connected to those
@@ -36,7 +36,7 @@ class CollectMindbenderInstances(pyblish.api.ContextPlugin):
 
     """
 
-    label = "Collect Mindbender Instances"
+    label = "Collect Avalon Instances"
     order = pyblish.api.CollectorOrder
     hosts = ["maya"]
 
@@ -59,7 +59,7 @@ class CollectMindbenderInstances(pyblish.api.ContextPlugin):
                 continue
 
             if not cmds.getAttr(objset + ".id") == (
-                    "pyblish.mindbender.instance"):
+                    "pyblish.avalon.instance"):
                 continue
 
             # The developer is responsible for specifying

@@ -1,8 +1,8 @@
 import pyblish.api
 
 
-class ExtractMindbenderHistory(pyblish.api.InstancePlugin):
-    label = "Extract Mindbender History"
+class ExtractAvalonHistory(pyblish.api.InstancePlugin):
+    label = "Extract Avalon History"
     order = pyblish.api.ExtractorOrder
     hosts = ["maya"]
     families = ["mindbender.animation"]
@@ -10,7 +10,7 @@ class ExtractMindbenderHistory(pyblish.api.InstancePlugin):
     def process(self, instance):
         import os
         from maya import cmds
-        from mindbender import api, maya
+        from avalon import api, maya
 
         self.log.info("Extracting history..")
 

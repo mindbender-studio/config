@@ -1,5 +1,5 @@
 from maya import cmds
-from mindbender import api
+from avalon import api
 
 
 class RigLoader(api.Loader):
@@ -25,7 +25,7 @@ class RigLoader(api.Loader):
 
     def post_process(self, name, namespace, context):
         import os
-        from mindbender import maya
+        from avalon import maya
 
         # TODO(marcus): We are hardcoding the name "out_SET" here.
         #   Better register this keyword, so that it can be used
@@ -52,7 +52,7 @@ class RigLoader(api.Loader):
 
                 # Publish to the currently set asset, and not the
                 # asset from which the Rig was produced.
-                asset=os.environ["MINDBENDER_ASSET"],
+                asset=os.environ["AVALON_ASSET"],
 
                 family="mindbender.animation",
                 options={"useSelection": True},

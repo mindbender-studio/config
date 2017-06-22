@@ -1,5 +1,5 @@
 from maya import cmds
-from mindbender import api
+from avalon import api
 
 
 class ModelLoader(api.Loader):
@@ -13,7 +13,7 @@ class ModelLoader(api.Loader):
     representations = ["ma"]
 
     def process(self, name, namespace, context):
-        from mindbender import maya
+        from avalon import maya
         with maya.maintained_selection():
             nodes = cmds.file(
                 self.fname,

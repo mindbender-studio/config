@@ -1,7 +1,7 @@
 import pyblish.api
 
 
-class MindbenderExtractHistoryLookdev(pyblish.api.InstancePlugin):
+class AvalonExtractHistoryLookdev(pyblish.api.InstancePlugin):
     """Export shaders for rendering
 
     Shaders are associated with an "mdID" attribute on each *transform* node.
@@ -19,7 +19,7 @@ class MindbenderExtractHistoryLookdev(pyblish.api.InstancePlugin):
         import os
         import contextlib
         from maya import cmds
-        from mindbender import api, maya
+        from avalon import api, maya
 
         @contextlib.contextmanager
         def sliced_connections():

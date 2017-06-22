@@ -15,14 +15,14 @@ from maya import cmds
 import pyblish.api
 import pyblish.util
 
-from mindbender import api, maya, io, inventory, schema
+from avalon import api, maya, io, inventory, schema
 
 from nose.tools import (
     with_setup,
     assert_equals,
 )
 
-IS_SILENT = bool(os.getenv("MINDBENDER_SILENT"))
+IS_SILENT = bool(os.getenv("AVALON_SILENT"))
 PROJECT_NAME = "hulk"
 ASSET_NAME = "Bruce"
 TASK_NAME = "modeling"
@@ -30,7 +30,7 @@ TASK_NAME = "modeling"
 self = sys.modules[__name__]
 self._tempdir = None
 self._config = {
-    "schema": "mindbender-core:config-1.0",
+    "schema": "avalon-core:config-1.0",
     "apps": [
         {"name": "app1"},
     ],
@@ -48,7 +48,7 @@ self._config = {
     "copy": {}
 }
 self._inventory = {
-    "schema": "mindbender-core:inventory-1.0",
+    "schema": "avalon-core:inventory-1.0",
     "assets": [
         {"name": ASSET_NAME},
     ],
@@ -61,18 +61,18 @@ def setup():
     api.register_root(self._tempdir)
 
     # Setup environment
-    os.environ["MINDBENDER_CONFIG"] = "polly"
-    os.environ["MINDBENDER_PROJECT"] = PROJECT_NAME
-    os.environ["MINDBENDER_ASSET"] = ASSET_NAME
-    os.environ["MINDBENDER_TASK"] = TASK_NAME
-    os.environ["MINDBENDER_ASSETPATH"] = (
+    os.environ["AVALON_CONFIG"] = "polly"
+    os.environ["AVALON_PROJECT"] = PROJECT_NAME
+    os.environ["AVALON_ASSET"] = ASSET_NAME
+    os.environ["AVALON_TASK"] = TASK_NAME
+    os.environ["AVALON_ASSETPATH"] = (
         "{root}/{project}/{silo}/{asset}".format(
             root=api.registered_root(),
             project=PROJECT_NAME,
             asset=ASSET_NAME,
             silo="assets"
         ))
-    os.environ["MINDBENDER_SILO"] = "assets"
+    os.environ["AVALON_SILO"] = "assets"
 
     api.install(maya)
     io.activate_project(PROJECT_NAME)
@@ -368,7 +368,7 @@ def test_modeling_to_rigging():
     cmds.select([group, out_set, controls_set], noExpand=True)
     maya.create(
         name="rigDefault",
-        asset=os.environ["MINDBENDER_ASSET"],
+        asset=os.environ["AVALON_ASSET"],
         family="mindbender.rig",
         options={"useSelection": True},
     )

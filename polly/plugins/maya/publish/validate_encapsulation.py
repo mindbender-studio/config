@@ -1,7 +1,7 @@
 import pyblish.api
 
 
-class ValidateMindbenderEncapsulation(pyblish.api.InstancePlugin):
+class ValidateAvalonEncapsulation(pyblish.api.InstancePlugin):
     """Resources must not contain absolute paths.
 
     When working with external files, such as textures and caches,

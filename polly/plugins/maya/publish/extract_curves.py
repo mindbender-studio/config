@@ -1,8 +1,8 @@
 import pyblish.api
 
 
-class ExtractMindbenderCurves(pyblish.api.InstancePlugin):
-    label = "Extract Mindbender Curves"
+class ExtractAvalonCurves(pyblish.api.InstancePlugin):
+    label = "Extract Avalon Curves"
     order = pyblish.api.ExtractorOrder
     hosts = ["maya"]
     families = ["mindbender.animation"]
@@ -10,7 +10,7 @@ class ExtractMindbenderCurves(pyblish.api.InstancePlugin):
     def process(self, instance):
         import os
         from maya import cmds
-        from mindbender import api, maya
+        from avalon import api, maya
 
         self.log.debug("Loading plug-in..")
         cmds.loadPlugin("atomImportExport.mll", quiet=True)

@@ -2,7 +2,7 @@ import os
 import json
 
 from maya import cmds
-from mindbender import api
+from avalon import api
 
 
 class LookLoader(api.Loader):
@@ -12,7 +12,7 @@ class LookLoader(api.Loader):
     representations = ["ma"]
 
     def process(self, name, namespace, context):
-        from mindbender import maya
+        from avalon import maya
         try:
             existing_reference = cmds.file(self.fname,
                                            query=True,

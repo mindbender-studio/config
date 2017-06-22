@@ -10,7 +10,7 @@ class SelectAssemblies(pyblish.api.Action):
         cmds.select(plugin.assemblies)
 
 
-class ValidateMindbenderSingleAssembly(pyblish.api.InstancePlugin):
+class ValidateAvalonSingleAssembly(pyblish.api.InstancePlugin):
     """Each asset must have a single top-level group
 
     The given instance is test-exported, along with construction
@@ -32,7 +32,7 @@ class ValidateMindbenderSingleAssembly(pyblish.api.InstancePlugin):
 
     def process(self, instance):
         from maya import cmds
-        from mindbender import maya
+        from avalon import maya
 
         with maya.maintained_selection():
             cmds.select(instance, replace=True)
