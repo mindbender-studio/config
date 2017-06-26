@@ -1,21 +1,19 @@
 import sys
 from maya import cmds
-from avalon.vendor.Qt import QtWidgets, QtCore
+
+from avalon import api
+from avalon.vendor.Qt import QtCore
 
 self = sys.modules[__name__]
-self._menu = "polly"
+self._menu = api.session["label"] + "menu"
 
 
 def install():
     from . import interactive
 
-    uninstall()
-
     def deferred():
-        cmds.menu(self._menu,
-                  label="Polly",
-                  tearOff=True,
-                  parent="MayaWindow")
+        # Append to Avalon's menu
+        cmds.menuItem(divider=True)
 
         # Modeling sub-menu
         cmds.menuItem("Modeling",
@@ -55,14 +53,8 @@ def install():
         cmds.menuItem("Auto Connect", command=interactive.auto_connect_assets)
 
     # Allow time for uninstallation to finish.
-    QtCore.QTimer.singleShot(100, deferred)
+    QtCore.QTimer.singleShot(200, deferred)
 
 
 def uninstall():
-    app = QtWidgets.QApplication.instance()
-    widgets = dict((w.objectName(), w) for w in app.allWidgets())
-    menu = widgets.get(self._menu)
-
-    if menu:
-        menu.deleteLater()
-        del(menu)
+    pass
