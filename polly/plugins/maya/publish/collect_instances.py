@@ -52,7 +52,7 @@ class CollectAvalonInstances(pyblish.api.ContextPlugin):
 
             is_empty = cmds.sets(objset, query=True) is None
             if is_empty:
-                self.log.info("Skipped following Set: \"%s\" " % objset)
+                self.log.info("%s skipped, it was empty." % objset)
                 continue
 
             if not cmds.objExists(objset + ".id"):
