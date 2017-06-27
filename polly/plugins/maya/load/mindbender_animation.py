@@ -7,7 +7,7 @@ class AbcLoader(api.Loader):
     families = ["mindbender.animation"]
     representations = ["abc"]
 
-    def process(self, name, namespace, context):
+    def process(self, name, namespace, context, data):
         from maya import cmds
 
         cmds.loadPlugin("AbcImport.mll", quiet=True)
@@ -35,7 +35,7 @@ class CurvesLoader(api.Loader):
     families = ["mindbender.animation"]
     representations = ["curves"]
 
-    def process(self, name, namespace, context):
+    def process(self, name, namespace, context, data):
         from maya import cmds
         from avalon import maya
 
@@ -47,7 +47,7 @@ class CurvesLoader(api.Loader):
                               namespace=namespace,
 
                               # Skip creation of Animation instance
-                              post_process=False)
+                              data={"post_process": False})
 
         try:
             control_set = next(
@@ -94,7 +94,11 @@ class CurvesLoader(api.Loader):
 
         self[:] = nodes + cmds.sets(container, query=True) + [container]
 
-    def post_process(self, name, namespace, context):
+        # Trigger post process only if it's not been set to disabled
+        if data.get("post_process", True):
+            self._post_process(name, namespace, context, data)
+
+    def _post_process(self, name, namespace, context, data):
         import os
         from maya import cmds
         from avalon import maya, io
@@ -150,5 +154,5 @@ class HistoryLoader(api.Loader):
     families = ["mindbender.animation"]
     representations = ["history"]
 
-    def process(self, name, namespace, context):
+    def process(self, name, namespace, context, data):
         raise NotImplementedError("Can't load history yet.")
