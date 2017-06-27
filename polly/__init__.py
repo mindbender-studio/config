@@ -13,3 +13,15 @@ def install():
 
 def uninstall():
     pyblish.deregister_plugin_path(PUBLISH_PATH)
+
+
+def format_staging_dir(root, time, name):
+    """Return directory used for staging of published assets
+
+    TODO(marcus): Deprecated, this should be a path template similar to
+        how other paths are defined.
+
+    """
+
+    dirname = os.path.join(root, "stage", name, time)
+    return dirname

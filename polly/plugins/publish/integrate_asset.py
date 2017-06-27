@@ -1,5 +1,4 @@
 import os
-import json
 import errno
 import shutil
 from pprint import pformat
@@ -42,6 +41,11 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
     ]
 
     def process(self, instance):
+        self.log.warning("HEHRHEHREHRHERERE")
+        self.log.warning("HEHRHEHREHRHERERE")
+        self.log.warning("HEHRHEHREHRHERERE")
+        self.log.warning("HEHRHEHREHRHERERE")
+        self.log.critical("HEHRHEHREHRHERERE")
         # Required environment variables
         PROJECT = os.environ["AVALON_PROJECT"]
         ASSET = instance.data.get("asset") or os.environ["AVALON_ASSET"]
@@ -54,6 +58,7 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
                                  ".abc": "Alembic"}
 
         context = instance.context
+
         # Atomicity
         #
         # Guarantee atomic publishes - each asset contains
@@ -124,8 +129,6 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
                                       locations=[LOCATION],
                                       data=version_data)
 
-        self.backwards_compatiblity(instance, subset, version)
-
         self.log.debug("Creating version: %s" % pformat(version))
         version_id = io.insert_one(version).inserted_id
 
@@ -188,6 +191,8 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
             }
 
             io.insert_one(representation)
+
+        context.data["published_version"] = str(version_id)
 
         self.log.info("Successfully integrated \"%s\" to \"%s\"" % (
             instance, dst))
@@ -264,130 +269,3 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
                 raise
 
         shutil.copy(src, dst)
-
-    def backwards_compatiblity(self, instance, subset, version):
-        """Maintain backwards compatibility with newly published assets
-
-        With the introduction of the database in 2.0, the artist would be
-        unable to publish in 2.0 and use the files in 1.0. Therefore, we
-        introduce this mechanism which continue to write for 1.0 even
-        when writing from the 2.0 pipeline.
-
-        This behaviour is deprecated and is to be removed in a future release.
-
-        """
-        from avalon import api
-
-        AVALON_PROJECT = os.environ["AVALON_PROJECT"]
-        AVALON_ASSET = os.environ["AVALON_ASSET"]
-        AVALON_SILO = os.environ["AVALON_SILO"]
-
-        context = instance.context
-
-        # Metadata
-        #  _________
-        # |         |.key = value
-        # |         |
-        # |         |
-        # |         |
-        # |         |
-        # |_________|
-        #
-        stagingdir = instance.data.get("stagingDir")
-        fname = os.path.join(stagingdir, ".metadata.json")
-
-        root = os.environ["AVALON_ASSETPATH"]
-        instancedir = os.path.join(root, "publish", instance.data["subset"])
-
-        try:
-            os.makedirs(instancedir)
-        except OSError as e:
-            if e.errno != errno.EEXIST:  # Already exists
-                self.log.critical("An unexpected error occurred.")
-                raise
-
-        versiondir = os.path.join(
-            instancedir,
-            api.format_version(version["name"])
-        )
-
-        try:
-            with open(fname) as f:
-                version_1_0 = json.load(f)
-
-        except IOError:
-            version_1_0 = dict(version, **{
-                "schema": "avalon-core:version-1.0",
-
-                # Hard-coded during transition
-                "path": versiondir.replace("\\", "/"),
-                "representations": list(),
-
-                "version": version["name"],
-
-                # Used to identify family of assets already on disk
-                "families": instance.data.get("families", list()) + [
-                    instance.data.get("family")
-                ],
-
-                "time": context.data["time"],
-                "timeFormat": "%Y%m%dT%H%M%SZ",
-                "author": context.data["user"],
-
-                # Record within which silo this asset was made.
-                "silo": os.environ["AVALON_SILO"],
-
-                # Collected by pyblish-maya
-                "source": os.path.join(
-                    "{root}",
-                    os.path.relpath(
-                        context.data["currentFile"],
-                        os.path.join(
-                            api.registered_root(),
-                            os.environ["AVALON_PROJECT"]
-                        )
-                    )
-                ).replace("\\", "/"),
-
-                # Discard database keys
-                "parent": None,
-            })
-
-        for filename in instance.data.get("files", list()):
-            name, ext = os.path.splitext(filename)
-            version_1_0["representations"].append(
-                {
-                    "schema": "avalon-core:representation-1.0",
-                    "format": ext,
-                    "path": os.path.join(
-                        "{dirname}",
-                        "%s{format}" % name,
-                    ).replace("\\", "/"),
-
-                    # Imprint shortcut to context
-                    # for performance reasons.
-                    "context": {
-                        "project": AVALON_PROJECT,
-                        "asset": AVALON_ASSET,
-                        "silo": AVALON_SILO,
-                        "subset": subset["name"],
-                        "version": version["name"],
-                        "representation": ext[1:]
-                    }
-                }
-            )
-
-        # Write to disk
-        #          _
-        #         | |
-        #        _| |_
-        #    ____\   /
-        #   |\    \ / \
-        #   \ \    v   \
-        #    \ \________.
-        #     \|________|
-        #
-        with open(fname, "w") as f:
-            json.dump(version_1_0, f, indent=4)
-
-        self.log.info("Successfully wrote %s." % fname)

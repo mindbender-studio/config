@@ -9,12 +9,13 @@ class ExtractAvalonHistory(pyblish.api.InstancePlugin):
 
     def process(self, instance):
         import os
+        import polly
         from maya import cmds
-        from avalon import api, maya
+        from avalon import maya
 
         self.log.info("Extracting history..")
 
-        dirname = api.format_staging_dir(
+        dirname = polly.format_staging_dir(
             root=instance.context.data["workspaceDir"],
             time=instance.context.data["time"],
             name=instance.data["name"])

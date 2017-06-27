@@ -17,9 +17,10 @@ class AvalonExtractHistoryLookdev(pyblish.api.InstancePlugin):
 
     def process(self, instance):
         import os
+        import polly
         import contextlib
         from maya import cmds
-        from avalon import api, maya
+        from avalon import maya
 
         @contextlib.contextmanager
         def sliced_connections():
@@ -43,7 +44,7 @@ class AvalonExtractHistoryLookdev(pyblish.api.InstancePlugin):
                 for src, dst in connections:
                     cmds.connectAttr(src, dst, force=True)
 
-        dirname = api.format_staging_dir(
+        dirname = polly.format_staging_dir(
             root=instance.context.data["workspaceDir"],
             time=instance.context.data["time"],
             name=instance.data["name"])
