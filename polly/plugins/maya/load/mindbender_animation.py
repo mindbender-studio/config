@@ -37,12 +37,19 @@ class CurvesLoader(api.Loader):
 
     def process(self, name, namespace, context, data):
         from maya import cmds
-        from avalon import maya
+        from avalon import maya, api
 
         cmds.loadPlugin("atomImportExport.mll", quiet=True)
 
+        # Load the rig using the RigLoader
+        loader = {Loader.__name__: Loader for Loader in
+                  api.discover(api.Loader)}.get("RigLoader", None)
+        if loader is None:
+            raise RuntimeError("Unable to find RigLoader")
+
         rig = context["representation"]["dependencies"][0]
-        container = maya.load(rig,
+        container = maya.load(loader,
+                              rig,
                               name=name,
                               namespace=namespace,
 
