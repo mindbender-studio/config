@@ -59,8 +59,11 @@ class CollectMindbenderInstances(pyblish.api.ContextPlugin):
                 continue
 
             if cmds.getAttr(objset + ".id") not in (
-                    "pyblish.mindbender.instance",
-                    "pyblish.avalon.instance"):
+                    "pyblish.avalon.instance",
+
+                    # Backwards compatibility
+                    "pyblish.mindbender.instance"):
+
                 continue
 
             # The developer is responsible for specifying
