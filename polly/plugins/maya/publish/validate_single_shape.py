@@ -1,7 +1,7 @@
 import pyblish.api
 
 
-class ValidateAvalonSingleShape(pyblish.api.InstancePlugin):
+class ValidateMindbenderSingleShape(pyblish.api.InstancePlugin):
     """Transforms with a mesh must ever only contain a single mesh
 
     This ensures models only contain a single shape node.

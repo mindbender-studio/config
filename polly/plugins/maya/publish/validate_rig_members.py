@@ -1,7 +1,7 @@
 import pyblish.api
 
 
-class ValidateAvalonRigFormat(pyblish.api.InstancePlugin):
+class ValidateMindbenderRigFormat(pyblish.api.InstancePlugin):
     """A rig must have a certain hierarchy and members
 
     - Must reside within `rig_GRP` transform

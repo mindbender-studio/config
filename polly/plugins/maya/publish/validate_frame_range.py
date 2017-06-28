@@ -1,7 +1,7 @@
 import pyblish.api
 
 
-class ValidateAvalonFrameRange(pyblish.api.InstancePlugin):
+class ValidateMindbenderFrameRange(pyblish.api.InstancePlugin):
     """Animation should normally be published with the range for a shot"""
 
     label = "Validate Frame Range"

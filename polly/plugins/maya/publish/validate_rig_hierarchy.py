@@ -1,7 +1,7 @@
 import pyblish.api
 
 
-class ValidateAvalonRigHierarchy(pyblish.api.InstancePlugin):
+class ValidateMindbenderRigHierarchy(pyblish.api.InstancePlugin):
     """A rig must reside under a single assembly called "ROOT"
 
     - Must reside within `ROOT` transform

@@ -2,7 +2,7 @@
 import pyblish.api
 
 
-class ValidateAvalonProjectEditInfo(pyblish.api.ContextPlugin):
+class ValidateMindbenderProjectEditInfo(pyblish.api.ContextPlugin):
     """Checks your scene with editorial info
 
     All the info that gets validated has been set by the projects bat files.

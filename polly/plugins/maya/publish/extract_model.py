@@ -1,7 +1,7 @@
 import pyblish.api
 
 
-class ExtractAvalonModel(pyblish.api.InstancePlugin):
+class ExtractMindbenderModel(pyblish.api.InstancePlugin):
     """Produce a stripped down Maya file from instance
 
     This plug-in takes into account only nodes relevant to models
@@ -10,7 +10,7 @@ class ExtractAvalonModel(pyblish.api.InstancePlugin):
 
     """
 
-    label = "Extract Avalon Model"
+    label = "Extract Mindbender Model"
     order = pyblish.api.ExtractorOrder
     hosts = ["maya"]
     families = ["mindbender.model"]

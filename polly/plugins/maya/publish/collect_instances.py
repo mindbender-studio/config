@@ -1,14 +1,14 @@
 import pyblish.api
 
 
-class CollectAvalonInstances(pyblish.api.ContextPlugin):
+class CollectMindbenderInstances(pyblish.api.ContextPlugin):
     """Gather instances by objectSet and pre-defined attribute
 
     This collector takes into account assets that are associated with
     an objectSet and marked with a unique identifier;
 
     Identifier:
-        id (str): "pyblish.avalon.instance"
+        id (str): "pyblish.mindbender.instance"
 
     Supported Families:
         mindbender.model: Geometric representation of artwork
@@ -36,7 +36,7 @@ class CollectAvalonInstances(pyblish.api.ContextPlugin):
 
     """
 
-    label = "Collect Avalon Instances"
+    label = "Collect Mindbender Instances"
     order = pyblish.api.CollectorOrder
     hosts = ["maya"]
 
@@ -59,7 +59,7 @@ class CollectAvalonInstances(pyblish.api.ContextPlugin):
                 continue
 
             if not cmds.getAttr(objset + ".id") == (
-                    "pyblish.avalon.instance"):
+                    "pyblish.mindbender.instance"):
                 continue
 
             # The developer is responsible for specifying

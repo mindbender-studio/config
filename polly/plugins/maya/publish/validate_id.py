@@ -1,10 +1,10 @@
 import pyblish.api
 
 
-class ValidateAvalonID(pyblish.api.InstancePlugin):
+class ValidateMindbenderID(pyblish.api.InstancePlugin):
     """All models must have an ID attribute"""
 
-    label = "Validate Avalon ID"
+    label = "Validate Mindbender ID"
     order = pyblish.api.ValidatorOrder
     hosts = ["maya"]
     families = [

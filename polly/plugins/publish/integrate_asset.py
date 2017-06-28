@@ -41,11 +41,6 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
     ]
 
     def process(self, instance):
-        self.log.warning("HEHRHEHREHRHERERE")
-        self.log.warning("HEHRHEHREHRHERERE")
-        self.log.warning("HEHRHEHREHRHERERE")
-        self.log.warning("HEHRHEHREHRHERERE")
-        self.log.critical("HEHRHEHREHRHERERE")
         # Required environment variables
         PROJECT = os.environ["AVALON_PROJECT"]
         ASSET = instance.data.get("asset") or os.environ["AVALON_ASSET"]

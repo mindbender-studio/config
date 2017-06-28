@@ -1,7 +1,7 @@
 import pyblish.api
 
 
-class AvalonExtractHistoryLookdev(pyblish.api.InstancePlugin):
+class MindbenderExtractHistoryLookdev(pyblish.api.InstancePlugin):
     """Export shaders for rendering
 
     Shaders are associated with an "mdID" attribute on each *transform* node.

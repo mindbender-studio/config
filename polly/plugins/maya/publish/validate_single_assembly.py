@@ -10,7 +10,7 @@ class SelectAssemblies(pyblish.api.Action):
         cmds.select(plugin.assemblies)
 
 
-class ValidateAvalonSingleAssembly(pyblish.api.InstancePlugin):
+class ValidateMindbenderSingleAssembly(pyblish.api.InstancePlugin):
     """Each asset must have a single top-level group
 
     The given instance is test-exported, along with construction

@@ -1,8 +1,8 @@
 import pyblish.api
 
 
-class ExtractAvalonCurves(pyblish.api.InstancePlugin):
-    label = "Extract Avalon Curves"
+class ExtractMindbenderCurves(pyblish.api.InstancePlugin):
+    label = "Extract Mindbender Curves"
     order = pyblish.api.ExtractorOrder
     hosts = ["maya"]
     families = ["mindbender.animation"]

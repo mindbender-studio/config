@@ -1,7 +1,7 @@
 import pyblish.api
 
 
-class ValidateAvalonNormals(pyblish.api.InstancePlugin):
+class ValidateMindbenderNormals(pyblish.api.InstancePlugin):
     """Normals of a model may not be locked
 
     Locked normals shading during interactive use to behave

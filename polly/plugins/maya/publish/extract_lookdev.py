@@ -1,7 +1,7 @@
 import pyblish.api
 
 
-class ExtractAvalonLookdev(pyblish.api.InstancePlugin):
+class ExtractMindbenderLookdev(pyblish.api.InstancePlugin):
     """Export shaders for rendering
 
     Shaders are associated with an "mdID" attribute on each *transform* node.
@@ -10,7 +10,7 @@ class ExtractAvalonLookdev(pyblish.api.InstancePlugin):
 
     """
 
-    label = "Extract Avalon Lookdev"
+    label = "Extract Mindbender Lookdev"
     order = pyblish.api.ExtractorOrder
     hosts = ["maya"]
     families = ["mindbender.lookdev"]
