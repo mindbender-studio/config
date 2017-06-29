@@ -8,7 +8,7 @@ class HistoryLookLoader(api.Loader):
     families = ["mindbender.historyLookdev"]
     representations = ["ma"]
 
-    def process(self, name, namespace, context):
+    def process(self, name, namespace, context, data):
         from avalon import maya
         with maya.maintained_selection():
             nodes = cmds.file(

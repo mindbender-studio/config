@@ -12,7 +12,7 @@ class RigLoader(api.Loader):
     families = ["mindbender.rig"]
     representations = ["ma"]
 
-    def process(self, name, namespace, context):
+    def process(self, name, namespace, context, data):
         nodes = cmds.file(self.fname,
                           namespace=namespace,
                           reference=True,
@@ -23,7 +23,11 @@ class RigLoader(api.Loader):
         # Store for post-process
         self[:] = nodes
 
-    def post_process(self, name, namespace, context):
+        # Trigger post process only if it's not been set to disabled
+        if data.get("post_process", True):
+            self._post_process(name, namespace, context, data)
+
+    def _post_process(self, name, namespace, context, data):
         import os
         from avalon import maya
 

@@ -11,7 +11,7 @@ class LookLoader(api.Loader):
     families = ["mindbender.lookdev"]
     representations = ["ma"]
 
-    def process(self, name, namespace, context):
+    def process(self, name, namespace, context, data):
         from avalon import maya
         try:
             existing_reference = cmds.file(self.fname,
