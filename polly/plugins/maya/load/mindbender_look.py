@@ -3,7 +3,7 @@ import json
 
 from maya import cmds
 from avalon import api, maya
-from polly import lib
+from polly.maya import lib
 
 
 class LookLoader(api.Loader):
