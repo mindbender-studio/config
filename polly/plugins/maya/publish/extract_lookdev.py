@@ -23,7 +23,7 @@ class ExtractMindbenderLookdev(pyblish.api.InstancePlugin):
         from maya import cmds
 
         from avalon import maya
-        from avalon.maya import lib
+        from polly.maya import lib
 
         dirname = polly.format_staging_dir(
             root=instance.context.data["workspaceDir"],

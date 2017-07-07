@@ -2,7 +2,8 @@ import os
 import json
 
 from maya import cmds
-from avalon import api
+from avalon import api, maya
+from polly import lib
 
 
 class LookLoader(api.Loader):
@@ -12,7 +13,6 @@ class LookLoader(api.Loader):
     representations = ["ma"]
 
     def process(self, name, namespace, context, data):
-        from avalon import maya
         try:
             existing_reference = cmds.file(self.fname,
                                            query=True,
@@ -45,6 +45,6 @@ class LookLoader(api.Loader):
         with open(self.fname) as f:
             relationships = json.load(f)
 
-        maya.apply_shaders(relationships, namespace)
+        lib.apply_shaders(relationships, namespace)
 
         self[:] = nodes
