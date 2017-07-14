@@ -1,7 +1,7 @@
-from avalon import api
+import avalon.maya
 
 
-class AbcLoader(api.Loader):
+class AbcLoader(avalon.maya.Loader):
     """Specific loader of Alembic for the mindbender.animation family"""
 
     families = ["mindbender.animation"]
@@ -29,7 +29,7 @@ class AbcLoader(api.Loader):
         self[:] = nodes
 
 
-class CurvesLoader(api.Loader):
+class CurvesLoader(avalon.maya.Loader):
     """Specific loader of Curves for the mindbender.animation family"""
 
     families = ["mindbender.animation"]
@@ -43,7 +43,7 @@ class CurvesLoader(api.Loader):
 
         # Load the rig using the RigLoader
         loader = {Loader.__name__: Loader for Loader in
-                  api.discover(api.Loader)}.get("RigLoader", None)
+                  api.discover(avalon.maya.Loader)}.get("RigLoader", None)
         if loader is None:
             raise RuntimeError("Unable to find RigLoader")
 
@@ -155,7 +155,7 @@ class CurvesLoader(api.Loader):
                 })
 
 
-class HistoryLoader(api.Loader):
+class HistoryLoader(avalon.maya.Loader):
     """Specific loader of Curves for the mindbender.animation family"""
 
     families = ["mindbender.animation"]

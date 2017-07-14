@@ -1,18 +1,19 @@
-import os
-import json
-
-from maya import cmds
-from avalon import api, maya
-from polly.maya import lib
+import avalon.maya
 
 
-class LookLoader(api.Loader):
+class LookLoader(avalon.maya.Loader):
     """Specific loader for lookdev"""
 
     families = ["mindbender.lookdev"]
     representations = ["ma"]
 
     def process(self, name, namespace, context, data):
+        import os
+        import json
+
+        from maya import cmds
+        from polly.maya import lib
+
         try:
             existing_reference = cmds.file(self.fname,
                                            query=True,
@@ -22,7 +23,7 @@ class LookLoader(api.Loader):
                 raise
 
             self.log.info("Loading lookdev for the first time..")
-            with maya.maintained_selection():
+            with avalon.maya.maintained_selection():
                 nodes = cmds.file(
                     self.fname,
                     namespace=namespace,

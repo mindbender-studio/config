@@ -1,8 +1,7 @@
-from maya import cmds
-from avalon import api
+import avalon.maya
 
 
-class RigLoader(api.Loader):
+class RigLoader(avalon.maya.Loader):
     """Specific loader for rigs
 
     This automatically creates an instance for animators upon load.
@@ -13,6 +12,8 @@ class RigLoader(api.Loader):
     representations = ["ma"]
 
     def process(self, name, namespace, context, data):
+        from maya import cmds
+
         nodes = cmds.file(self.fname,
                           namespace=namespace,
                           reference=True,
@@ -25,41 +26,35 @@ class RigLoader(api.Loader):
 
         # Trigger post process only if it's not been set to disabled
         if data.get("post_process", True):
-            self._post_process(name, namespace, context, data)
+            # TODO(marcus): We are hardcoding the name "out_SET" here.
+            #   Better register this keyword, so that it can be used
+            #   elsewhere, such as in the Integrator plug-in,
+            #   without duplication.
+            output = next(
+                (node for node in self
+                    if node.endswith("out_SET")), None)
+            controls = next(
+                (node for node in self
+                    if node.endswith("controls_SET")), None)
 
-    def _post_process(self, name, namespace, context, data):
-        import os
-        from avalon import maya
+            assert output, "No out_SET in rig, this is a bug."
+            assert controls, "No controls_SET in rig, this is a bug."
 
-        # TODO(marcus): We are hardcoding the name "out_SET" here.
-        #   Better register this keyword, so that it can be used
-        #   elsewhere, such as in the Integrator plug-in,
-        #   without duplication.
-        output = next(
-            (node for node in self
-                if node.endswith("out_SET")), None)
-        controls = next(
-            (node for node in self
-                if node.endswith("controls_SET")), None)
+            with avalon.maya.maintained_selection():
+                cmds.select([output, controls], noExpand=True)
 
-        assert output, "No out_SET in rig, this is a bug."
-        assert controls, "No controls_SET in rig, this is a bug."
+                dependencies = [context["representation"]["_id"]]
+                asset = context["asset"]["name"] + "_"
 
-        with maya.maintained_selection():
-            cmds.select([output, controls], noExpand=True)
+                avalon.maya.create(
+                    name=avalon.maya.unique_name(asset, suffix="_SET"),
 
-            dependencies = [context["representation"]["_id"]]
-            asset = context["asset"]["name"] + "_"
+                    # Publish to the currently set asset, and not the
+                    # asset from which the Rig was produced.
+                    asset=context["asset"],
 
-            maya.create(
-                name=maya.unique_name(asset, suffix="_SET"),
-
-                # Publish to the currently set asset, and not the
-                # asset from which the Rig was produced.
-                asset=os.environ["AVALON_ASSET"],
-
-                family="mindbender.animation",
-                options={"useSelection": True},
-                data={
-                    "dependencies": " ".join(str(d) for d in dependencies)
-                })
+                    family="mindbender.animation",
+                    options={"useSelection": True},
+                    data={
+                        "dependencies": " ".join(str(d) for d in dependencies)
+                    })

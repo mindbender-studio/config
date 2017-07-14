@@ -1,8 +1,7 @@
-from maya import cmds
-from avalon import api
+import avalon.maya
 
 
-class ModelLoader(api.Loader):
+class ModelLoader(avalon.maya.Loader):
     """Load models
 
     Stores the imported asset in a container named after the asset.
@@ -13,8 +12,8 @@ class ModelLoader(api.Loader):
     representations = ["ma"]
 
     def process(self, name, namespace, context, data):
-        from avalon import maya
-        with maya.maintained_selection():
+        from maya import cmds
+        with avalon.maya.maintained_selection():
             nodes = cmds.file(
                 self.fname,
                 namespace=namespace,

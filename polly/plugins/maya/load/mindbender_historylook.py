@@ -1,16 +1,16 @@
-from maya import cmds
-from avalon import api
+import avalon.maya
 
 
-class HistoryLookLoader(api.Loader):
+class HistoryLookLoader(avalon.maya.Loader):
     """Specific loader for lookdev"""
 
     families = ["mindbender.historyLookdev"]
     representations = ["ma"]
 
     def process(self, name, namespace, context, data):
-        from avalon import maya
-        with maya.maintained_selection():
+        from maya import cmds
+
+        with avalon.maya.maintained_selection():
             nodes = cmds.file(
                 self.fname,
                 namespace=namespace,
