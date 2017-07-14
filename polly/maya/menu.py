@@ -5,7 +5,7 @@ from avalon import api
 from avalon.vendor.Qt import QtCore
 
 self = sys.modules[__name__]
-self._menu = api.session["label"] + "menu"
+self._menu = api.Session["AVALON_LABEL"] + "menu"
 
 
 def install():
