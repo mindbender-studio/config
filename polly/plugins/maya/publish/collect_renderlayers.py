@@ -19,6 +19,7 @@ class CollectMindbenderMayaRenderlayers(pyblish.api.ContextPlugin):
                 continue
 
             data = {
+                "family": "Render Layers",
                 "families": ["mindbender.renderlayer"],
                 "publish": cmds.getAttr(layer + ".renderable"),
                 "startFrame": render_global("startFrame"),
