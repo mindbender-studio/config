@@ -4,7 +4,7 @@ import pyblish.api
 class CollectAvalonTime(pyblish.api.ContextPlugin):
     """Store global time at the time of publish"""
 
-    label = "Collect Avalon Time"
+    label = "Time"
     order = pyblish.api.CollectorOrder
 
     def process(self, context):
