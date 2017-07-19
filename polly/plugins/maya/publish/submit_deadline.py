@@ -21,7 +21,8 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
 
         from maya import cmds
 
-        from avalon import api
+        from avalon import api, maya
+        from avalon.maya import lib
         from avalon.vendor import requests
 
         assert api.Session["AVALON_DEADLINE"], "Requires AVALON_DEADLINE"
@@ -76,14 +77,23 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
         }
 
         # Include session with submission
-        session = {
+        payload["JobInfo"].update({
             "EnvironmentKeyValue%d" % index: "{key}={value}".format(
                 key=key,
                 value=api.Session[key]
             ) for index, key in enumerate(api.Session)
-        }
+        })
 
-        payload["JobInfo"].update(session)
+        # Include global settings
+        try:
+            render_globals = maya.lsattr("id", "avalon.renderglobals")[0]
+        except IndexError:
+            pass
+        else:
+            render_globals = lib.read(render_globals)
+            payload["JobInfo"]["Pool"] = render_globals["pool"]
+            payload["JobInfo"]["Group"] = render_globals["group"]
+
         payload = json.dumps(payload, indent=4, sort_keys=True)
 
         self.log.info("Submitting..")
