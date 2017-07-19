@@ -9,7 +9,7 @@ self._menu = api.Session["AVALON_LABEL"] + "menu"
 
 
 def install():
-    from . import interactive
+    from . import interactive, tools
 
     def deferred():
         # Append to Avalon's menu
@@ -45,6 +45,16 @@ def install():
                       parent=self._menu)
 
         cmds.menuItem("Set Defaults", command=interactive.set_defaults)
+
+        # Rendering sub-menu
+        cmds.menuItem("Rendering",
+                      label="Rendering",
+                      tearOff=True,
+                      subMenu=True,
+                      parent=self._menu)
+
+        cmds.menuItem("Edit Render Globals",
+                      command=tools.render_globals_editor)
 
         cmds.setParent("..", menu=True)
 
