@@ -47,17 +47,31 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
                     step=int(instance.data["byFrameStep"]),
                 ),
                 "Comment": comment,
+
+                # Optional, enable double-click to preview rendered
+                # frames from Deadline Monitor
                 "OutputFilename0": self.preview_fname(instance),
             },
             "PluginInfo": {
                 "OutputFilePath": os.path.join(workspace, "images"),
                 "SceneFile": fpath,
+
+                # Mandatory for Deadline
                 "Version": cmds.about(version=True),
+
+                # Only render layers are considered renderable in this pipeline
                 "UsingRenderLayers": True,
-                "UseLegacyRenderLayers": True,
+
                 "RenderLayer": instance.name,
+
+                # Determine which renderer to use from the file itself
+                "Renderer": "file",
+
+                # TODO(marcus): Is this really needed?
                 "ProjectPath": workspace,
             },
+
+            # Mandatory for Deadline, may be empty
             "AuxFiles": []
         }
 
