@@ -17,6 +17,7 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
     def process(self, instance):
         import os
         import json
+        import shutil
         import getpass
 
         from maya import cmds
@@ -31,22 +32,35 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
         workspace = context.data["workspaceDir"]
         fpath = context.data["currentFile"]
         fname = os.path.basename(fpath)
-        comment, _, _ = context.data.get("comment", "").partition("\n")
+        comment = context.data.get("comment", "")
+        dirname = os.path.join(workspace, "renders", context.data["time"])
+
+        try:
+            os.makedirs(dirname)
+        except OSError:
+            pass
 
         # E.g. http://192.168.0.1:8082/api/jobs
         url = api.Session["AVALON_DEADLINE"] + "/api/jobs"
 
         payload = {
             "JobInfo": {
+                # Top-level group name
+                "BatchName": fname,
+
+                # Job name, as seen in Monitor
                 "Name": "%s - %s" % (fname, instance.name),
-                "BatchName": "%s - \"%s\"" % (fname, comment),
+
+                # Arbitrary username, for visualisation in Monitor
                 "UserName": getpass.getuser(),
+
                 "Plugin": "MayaBatch",
                 "Frames": "{start}-{end}x{step}".format(
                     start=int(instance.data["startFrame"]),
                     end=int(instance.data["endFrame"]),
                     step=int(instance.data["byFrameStep"]),
                 ),
+
                 "Comment": comment,
 
                 # Optional, enable double-click to preview rendered
@@ -54,8 +68,12 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
                 "OutputFilename0": self.preview_fname(instance),
             },
             "PluginInfo": {
-                "OutputFilePath": os.path.join(workspace, "images"),
+                # Input
                 "SceneFile": fpath,
+
+                # Output directory and filename
+                "OutputFilePath": dirname,
+                "OutputFilePrefix": "<RenderLayer>/<RenderLayer>",
 
                 # Mandatory for Deadline
                 "Version": cmds.about(version=True),
@@ -63,12 +81,13 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
                 # Only render layers are considered renderable in this pipeline
                 "UsingRenderLayers": True,
 
+                # Render only this layer
                 "RenderLayer": instance.name,
 
                 # Determine which renderer to use from the file itself
                 "Renderer": "file",
 
-                # TODO(marcus): Is this really needed?
+                # Resolve relative references
                 "ProjectPath": workspace,
             },
 
@@ -84,7 +103,7 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
             ) for index, key in enumerate(api.Session)
         })
 
-        # Include global settings
+        # Include (optional) global settings
         try:
             render_globals = maya.lsattr("id", "avalon.renderglobals")[0]
         except IndexError:
@@ -94,16 +113,36 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
             payload["JobInfo"]["Pool"] = render_globals["pool"]
             payload["JobInfo"]["Group"] = render_globals["group"]
 
-        payload = json.dumps(payload, indent=4, sort_keys=True)
-
-        self.log.info("Submitting..")
-        self.log.info(payload)
-
         self.preflight_check(instance)
 
-        response = requests.post(url, data=payload)
+        self.log.info("Submitting..")
+        self.log.info(json.dumps(
+            payload, indent=4, sort_keys=True)
+        )
 
-        assert response.ok, response.text
+        response = requests.post(url, json=payload)
+
+        if response.ok:
+            # Write metadata for publish
+            fname = os.path.join(dirname, instance.name + ".json")
+            data = {
+                "submission": payload,
+                "session": api.Session,
+                "instance": instance.data,
+                "job": response.json(),
+            }
+
+            with open(fname, "w") as f:
+                json.dump(data, f, indent=4, sort_keys=True)
+
+        else:
+            try:
+                shutil.rmtree(dirname)
+            except OSError:
+                # This is nice-to-have, but not critical to the operation
+                pass
+
+            raise Exception(response.text)
 
     def preview_fname(self, instance):
         """Return outputted filename with #### for padding

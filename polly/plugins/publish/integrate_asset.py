@@ -5,6 +5,7 @@ from pprint import pformat
 
 import pyblish.api
 from avalon import api, io
+from avalon.vendor import clique
 
 
 class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
@@ -29,7 +30,7 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
 
     """
 
-    label = "Integrate Avalon Asset"
+    label = "Asset"
     order = pyblish.api.IntegratorOrder
     families = [
         "mindbender.model",
@@ -37,7 +38,8 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
         "mindbender.animation",
         "mindbender.lookdev",
         "mindbender.historyLookdev",
-        "mindbender.group"
+        "mindbender.group",
+        "mindbender.imagesequence",
     ]
 
     def process(self, instance):
@@ -148,17 +150,22 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
 
         template_publish = project["config"]["template"]["publish"]
 
-        for fname in os.listdir(stagingdir):
+        for fname in instance.data["files"]:
             name, ext = os.path.splitext(fname)
-            template_data["representation"] = ext[1:]
+
+            if instance.data.get("isSeries"):
+                head, padding, tail = clique.split(fname)
+                representation = padding + tail
+            else:
+                representation = ext[1:]
+
+            template_data["representation"] = representation
+            if instance.data.get("isSeries"):
+                clique.parse('rs_beauty.%d.png [1000-1002]').format()
+                template_data["representation"]
 
             src = os.path.join(stagingdir, fname)
             dst = template_publish.format(**template_data)
-
-            # Backwards compatibility
-            if fname == ".metadata.json":
-                dirname = os.path.dirname(dst)
-                dst = os.path.join(dirname, ".metadata.json")
 
             self.log.info("Copying %s -> %s" % (src, dst))
 
