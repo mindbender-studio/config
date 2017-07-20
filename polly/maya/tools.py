@@ -114,7 +114,6 @@ class _RenderGlobalsEditor(QtWidgets.QDialog):
 
 
 def render_globals_editor(*args):
-
     parent = {
         widget.objectName(): widget
         for widget in QtWidgets.QApplication.topLevelWidgets()
