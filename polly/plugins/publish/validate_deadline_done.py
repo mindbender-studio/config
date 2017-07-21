@@ -42,29 +42,31 @@ class ValidateMindbenderDeadlineDone(pyblish.api.InstancePlugin):
                             "(missing metadata)" % instance)
 
         url = api.Session["AVALON_DEADLINE"] + "/api/jobs?JobID=%s"
-        response = requests.get(url % metadata["job"]["_id"])
 
-        if response.ok:
-            data = response.json()[0]
-            state = states.get(data["Stat"])
+        for job in metadata["jobs"]:
+            response = requests.get(url % job["_id"])
 
-            if state in (None, "Unknown"):
-                raise Exception("State of this render is unknown")
+            if response.ok:
+                data = response.json()[0]
+                state = states.get(data["Stat"])
 
-            elif state == "Active":
-                raise Exception("This render is still currently active")
+                if state in (None, "Unknown"):
+                    raise Exception("State of this render is unknown")
 
-            elif state == "Suspended":
-                raise Exception("This render is suspended")
+                elif state == "Active":
+                    raise Exception("This render is still currently active")
 
-            elif state == "Failed":
-                raise Exception("This render was not successful")
+                elif state == "Suspended":
+                    raise Exception("This render is suspended")
 
-            elif state == "Pending":
-                raise Exception("This render is pending")
+                elif state == "Failed":
+                    raise Exception("This render was not successful")
+
+                elif state == "Pending":
+                    raise Exception("This render is pending")
+                else:
+                    self.log.info("%s was rendered successfully" % instance)
+
             else:
-                self.log.info("%s was rendered successfully" % instance)
-
-        else:
-            raise Exception("Could not determine the current status "
-                            " of this render")
+                raise Exception("Could not determine the current status "
+                                " of this render")
