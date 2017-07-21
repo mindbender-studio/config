@@ -17,6 +17,8 @@ class CreateRenderGlobals(maya.Creator):
         self.data.update({
             "pool": "",
             "group": "",
+            "frames": "",
+            "priority": "50",
         })
 
     def process(self):

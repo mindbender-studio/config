@@ -10,7 +10,17 @@ class ValidateMindbenderProtectedScene(pyblish.api.ContextPlugin):
     optional = True
 
     def process(self, context):
+        import os
         from maya import cmds
-        assert not cmds.file(renameToSave=True, query=True), (
-            "This file is protected, please save scene under a new name"
-        )
+
+        try:
+            basename = os.path.basename(context.data["currentFile"])
+            is_protected = cmds.getAttr("protect.basename") == basename
+        except ValueError:
+            is_protected = False
+
+        assert not (
+            cmds.file(renameToSave=True, query=True) or is_protected
+        ), ("This file is protected, please save scene under a new name. "
+            "If you are sure of what you are doing, you can override this "
+            "warning by calling cmds.remove('protect')")

@@ -22,8 +22,7 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
 
         from maya import cmds
 
-        from avalon import api, maya
-        from avalon.maya import lib
+        from avalon import api
         from avalon.vendor import requests
 
         assert api.Session["AVALON_DEADLINE"], "Requires AVALON_DEADLINE"
@@ -32,8 +31,9 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
         workspace = context.data["workspaceDir"]
         fpath = context.data["currentFile"]
         fname = os.path.basename(fpath)
+        name, ext = os.path.splitext(fname)
         comment = context.data.get("comment", "")
-        dirname = os.path.join(workspace, "renders", context.data["time"])
+        dirname = os.path.join(workspace, "renders", name)
 
         try:
             os.makedirs(dirname)
@@ -43,6 +43,10 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
         # E.g. http://192.168.0.1:8082/api/jobs
         url = api.Session["AVALON_DEADLINE"] + "/api/jobs"
 
+        # Documentation for keys available at:
+        # https://docs.thinkboxsoftware.com
+        #    /products/deadline/8.0/1_User%20Manual/manual
+        #    /manual-submission.html#job-info-file-options
         payload = {
             "JobInfo": {
                 # Top-level group name
@@ -95,23 +99,29 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
             "AuxFiles": []
         }
 
-        # Include session with submission
+        # Include critical variables with submission
+        environment = dict({
+            # This will trigger `userSetup.py` on the slave
+            # such that proper initialisation happens the same
+            # way as it does on a local machine.
+            # TODO(marcus): This won't work if the slaves don't
+            # have accesss to these paths, such as if slaves are
+            # running Linux and the submitter is on Windows.
+            "PYTHONPATH": os.getenv("PYTHONPATH", ""),
+
+        }, **api.Session)
+
         payload["JobInfo"].update({
             "EnvironmentKeyValue%d" % index: "{key}={value}".format(
                 key=key,
-                value=api.Session[key]
-            ) for index, key in enumerate(api.Session)
+                value=environment[key]
+            ) for index, key in enumerate(environment)
         })
 
-        # Include (optional) global settings
-        try:
-            render_globals = maya.lsattr("id", "avalon.renderglobals")[0]
-        except IndexError:
-            pass
-        else:
-            render_globals = lib.read(render_globals)
-            payload["JobInfo"]["Pool"] = render_globals["pool"]
-            payload["JobInfo"]["Group"] = render_globals["group"]
+        # Include optional render globals
+        payload["JobInfo"].update(
+            instance.data.get("renderGlobals", {})
+        )
 
         self.preflight_check(instance)
 
@@ -129,7 +139,9 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
                 "submission": payload,
                 "session": api.Session,
                 "instance": instance.data,
-                "job": response.json(),
+                "jobs": [
+                    response.json()
+                ],
             }
 
             with open(fname, "w") as f:
