@@ -14,20 +14,6 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
     This plug-in exposes your data to others by encapsulating it
     into a new version.
 
-    Schema:
-        Data is written in the following format.
-         ____________________
-        |                    |
-        | version            |
-        |  ________________  |
-        | |                | |
-        | | representation | |
-        | |________________| |
-        | |                | |
-        | | ...            | |
-        | |________________| |
-        |____________________|
-
     """
 
     label = "Asset"
@@ -49,7 +35,7 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
         SILO = os.environ["AVALON_SILO"]
         LOCATION = os.getenv("AVALON_LOCATION")
 
-        # todo(marcus): avoid hardcoding labels in the integrator
+        # TODO(marcus): avoid hardcoding labels in the integrator
         representation_labels = {".ma": "Maya Ascii",
                                  ".source": "Original source file",
                                  ".abc": "Alembic"}
@@ -108,7 +94,6 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
 
             subset = io.find_one({"_id": _id})
 
-        # get next version
         latest_version = io.find_one({"type": "version",
                                       "parent": subset["_id"]},
                                      {"name": True},
@@ -120,11 +105,24 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
 
         self.log.debug("Next version: %i" % next_version)
 
-        version_data = self.create_version_data(context, instance)
-        version = self.create_version(subset=subset,
-                                      version_number=next_version,
-                                      locations=[LOCATION],
-                                      data=version_data)
+        version = {
+            "schema": "avalon-core:version-2.0",
+            "type": "version",
+            "parent": subset["_id"],
+            "name": next_version,
+            "locations": [LOCATION] if LOCATION else [],
+            "data": {
+                "families": (
+                    instance.data.get("families", list()) +
+                    [instance.data["family"]]
+                ),
+                "time": context.data["time"],
+                "author": context.data["user"],
+                "source": context.data["currentFile"].replace(
+                    api.registered_root(), "{root}").replace("\\", "/"),
+                "comment": context.data.get("comment")
+            }
+        }
 
         self.log.debug("Creating version: %s" % pformat(version))
         version_id = io.insert_one(version).inserted_id
@@ -151,26 +149,27 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
         template_publish = project["config"]["template"]["publish"]
 
         for fname in instance.data["files"]:
-            name, ext = os.path.splitext(fname)
+            _, ext = os.path.splitext(fname)
 
-            if instance.data.get("isSeries"):
-                head, padding, tail = clique.split(fname)
-                representation = padding + tail
-            else:
-                representation = ext[1:]
-
+            representation = ext[1:]
             template_data["representation"] = representation
-            if instance.data.get("isSeries"):
-                clique.parse('rs_beauty.%d.png [1000-1002]').format()
-                template_data["representation"]
 
             src = os.path.join(stagingdir, fname)
             dst = template_publish.format(**template_data)
 
             self.log.info("Copying %s -> %s" % (src, dst))
 
-            # copy source to destination (library)
-            self.copy_file(src, dst)
+            dirname = os.path.dirname(dst)
+            try:
+                os.makedirs(dirname)
+            except OSError as e:
+                if e.errno == errno.EEXIST:
+                    pass
+                else:
+                    self.log.critical("An unexpected error occurred.")
+                    raise
+
+            shutil.copy(src, dst)
 
             representation = {
                 "schema": "avalon-core:representation-2.0",
@@ -180,15 +179,14 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
                 "data": {"label": representation_labels.get(ext)},
                 "dependencies": instance.data.get("dependencies", "").split(),
 
-                # Imprint shortcut to context
-                # for performance reasons.
+                # Imprint shortcut to context for performance reasons.
                 "context": {
                     "project": PROJECT,
                     "asset": ASSET,
                     "silo": SILO,
                     "subset": subset["name"],
                     "version": version["name"],
-                    "representation": ext[1:]
+                    "representation": representation
                 }
             }
 
@@ -198,76 +196,3 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
 
         self.log.info("Successfully integrated \"%s\" to \"%s\"" % (
             instance, dst))
-
-    def create_version(self, subset, version_number, locations, data=None):
-        """ Copy given source to destination
-
-        Arguments:
-            subset (dict): the registered subset of the asset
-            version_number (int): the version number
-            locations (list): the currently registered locations
-        """
-        # Imprint currently registered location
-        version_locations = [location for location in locations if
-                             location is not None]
-
-        return {"schema": "avalon-core:version-2.0",
-                "type": "version",
-                "parent": subset["_id"],
-                "name": version_number,
-                "locations": version_locations,
-                "data": data}
-
-    def create_version_data(self, context, instance):
-        """
-        Create the data collection for th version
-        Args:
-            context (object): the current context
-            instance(object): the current instance being published
-
-        Returns:
-            dict: the required information with instance.data as key
-        """
-
-        families = []
-        current_families = instance.data.get("families", list())
-        instance_family = instance.data.get("family", None)
-
-        families += current_families
-        if instance_family is not None:
-            families.append(instance_family)
-
-        # create relative source path for DB
-        relative_path = os.path.relpath(context.data["currentFile"],
-                                        api.registered_root())
-        source = os.path.join("{root}", relative_path).replace("\\", "/")
-
-        version_data = {"families": families,
-                        "time": context.data["time"],
-                        "author": context.data["user"],
-                        "source": source,
-                        "comment": context.data.get("comment")}
-
-        return dict(instance.data, **version_data)
-
-    def copy_file(self, src, dst):
-        """ Copy given source to destination
-
-        Arguments:
-            src (str): the source file which needs to be copied
-            dst (str): the destination of the sourc file
-        Returns:
-            None
-        """
-
-        dirname = os.path.dirname(dst)
-        try:
-            os.makedirs(dirname)
-        except OSError as e:
-            if e.errno == errno.EEXIST:
-                pass
-            else:
-                self.log.critical("An unexpected error occurred.")
-                raise
-
-        shutil.copy(src, dst)
