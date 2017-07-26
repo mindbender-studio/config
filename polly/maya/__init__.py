@@ -1,7 +1,7 @@
 import os
 import uuid
 
-from maya import cmds
+from maya import cmds, OpenMaya
 
 from avalon import maya, api as avalon
 from pyblish import api as pyblish
@@ -27,6 +27,7 @@ def install():
     avalon.on("init", on_init)
     avalon.on("new", on_new)
     avalon.on("save", on_save)
+    avalon.before("save", before_save)
 
 
 def uninstall():
@@ -52,14 +53,14 @@ def _set_uuid(node):
         cmds.setAttr(attr, uid, type="string")
 
 
-def on_init():
+def on_init(_):
     avalon.logger.info("Running callback on init..")
 
     maya.commands.reset_frame_range()
     maya.commands.reset_resolution()
 
 
-def on_new():
+def on_new(_):
     avalon.logger.info("Running callback on new..")
 
     # Load dependencies
@@ -70,7 +71,7 @@ def on_new():
     maya.commands.reset_resolution()
 
 
-def on_save():
+def on_save(_):
     """Automatically add IDs to new nodes
 
     Any transform of a mesh, without an exising ID,
@@ -89,3 +90,21 @@ def on_save():
     # Add unique identifiers
     for node in transforms:
         _set_uuid(node)
+
+
+def before_save(return_code, _):
+    """Prevent accidental overwrite of locked scene"""
+
+    # Manually override message given by default dialog
+    # Tested with Maya 2013-2017
+    dialog_id = "s_TfileIOStrings.rFileOpCancelledByUser"
+    message = ("Scene is locked, please save under a new name "
+               "or run cmds.remove(\"lock\") to override")
+    cmds.displayString(dialog_id, replace=True, value=message)
+
+    # Returning false in C++ causes this to abort a save in-progress,
+    # but that doesn't translate from Python. Instead, the `setBool`
+    # is used to mimic this beahvior.
+    # Docs: http://download.autodesk.com/us/maya/2011help/api/
+    # class_m_scene_message.html#a6bf4288015fa7dab2d2074c3a49f936
+    OpenMaya.MScriptUtil.setBool(return_code, not maya.is_locked())
