@@ -10,7 +10,7 @@ class CollectMindbenderMayaRenderlayers(pyblish.api.ContextPlugin):
 
     def process(self, context):
         from maya import cmds
-        from avalon import maya
+        from avalon import maya, api
 
         def render_global(attr):
             return cmds.getAttr("defaultRenderGlobals." + attr)
@@ -27,6 +27,12 @@ class CollectMindbenderMayaRenderlayers(pyblish.api.ContextPlugin):
                 "endFrame": render_global("endFrame"),
                 "byFrameStep": render_global("byFrameStep"),
                 "renderer": render_global("currentRenderer"),
+
+                "time": context.data["time"],
+                "author": context.data["user"],
+                "source": context.data["currentFile"].replace(
+                    api.registered_root(), "{root}"
+                ).replace("\\", "/"),
             }
 
             # Apply each user defined attribute as data
