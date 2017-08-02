@@ -1,11 +1,5 @@
-import os
-import errno
-import shutil
-from pprint import pformat
 
 import pyblish.api
-from avalon import api, io
-from avalon.vendor import clique
 
 
 class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
@@ -29,16 +23,19 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
     ]
 
     def process(self, instance):
-        # Required environment variables
-        PROJECT = os.environ["AVALON_PROJECT"]
-        ASSET = instance.data.get("asset") or os.environ["AVALON_ASSET"]
-        SILO = os.environ["AVALON_SILO"]
-        LOCATION = os.getenv("AVALON_LOCATION")
+        import os
+        import errno
+        import shutil
+        from pprint import pformat
 
-        # TODO(marcus): avoid hardcoding labels in the integrator
-        representation_labels = {".ma": "Maya Ascii",
-                                 ".source": "Original source file",
-                                 ".abc": "Alembic"}
+        from avalon import api, io
+        from avalon.vendor import filelink
+
+        # Required environment variables
+        PROJECT = api.Session["AVALON_PROJECT"]
+        ASSET = instance.data.get("asset") or api.Session["AVALON_ASSET"]
+        SILO = api.Session["AVALON_SILO"]
+        LOCATION = api.Session["AVALON_LOCATION"]
 
         context = instance.context
 
@@ -116,10 +113,15 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
                     instance.data.get("families", list()) +
                     [instance.data["family"]]
                 ),
-                "time": context.data["time"],
-                "author": context.data["user"],
-                "source": context.data["currentFile"].replace(
-                    api.registered_root(), "{root}").replace("\\", "/"),
+
+                # Enable overriding with current information from instance
+                "time": instance.data.get("time", context.data["time"]),
+                "author": instance.data.get("user", context.data["user"]),
+                "source": instance.data.get(
+                    "source", context.data["currentFile"]).replace(
+                    api.registered_root(), "{root}"
+                ).replace("\\", "/"),
+
                 "comment": context.data.get("comment")
             }
         }
@@ -148,17 +150,10 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
 
         template_publish = project["config"]["template"]["publish"]
 
-        for fname in instance.data["files"]:
-            _, ext = os.path.splitext(fname)
+        if "output" not in instance.data:
+            instance.data["output"] = list()
 
-            representation = ext[1:]
-            template_data["representation"] = representation
-
-            src = os.path.join(stagingdir, fname)
-            dst = template_publish.format(**template_data)
-
-            self.log.info("Copying %s -> %s" % (src, dst))
-
+        def copy(src, dst):
             dirname = os.path.dirname(dst)
             try:
                 os.makedirs(dirname)
@@ -169,14 +164,79 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
                     self.log.critical("An unexpected error occurred.")
                     raise
 
-            shutil.copy(src, dst)
+            try:
+                filelink.create(src, dst)
+                self.log.info("Linking %s -> %s" % (src, dst))
+            except Exception:
+                # Revert to a normal copy
+                # TODO(marcus): Once filelink is proven stable,
+                # improve upon or remove this fallback.
+                shutil.copy(src, dst)
+                self.log.info("Linking failed, copying %s -> %s"
+                              % (src, dst))
+
+        for _ in instance.data["files"]:
+
+            # Collection
+            #   _______
+            #  |______|\
+            # |      |\|
+            # |       ||
+            # |       ||
+            # |       ||
+            # |_______|
+            #
+            if isinstance(_, list):
+                collection = _
+
+                # Assert that each member has identical suffix
+                _, ext = os.path.splitext(collection[0])
+                assert all(ext == os.path.splitext(name)[1]
+                           for name in collection), (
+                    "Files had varying suffixes, this is a bug"
+                )
+
+                template_data["representation"] = ext[1:]
+
+                for fname in collection:
+                    src = os.path.join(stagingdir, fname)
+                    dst = os.path.join(
+                        template_publish.format(**template_data),
+                        fname
+                    )
+
+                    copy(src, dst)
+
+                    instance.data["output"].append(dst)
+
+            else:
+                # Single file
+                #  _______
+                # |      |\
+                # |       |
+                # |       |
+                # |       |
+                # |_______|
+                #
+                fname = _
+
+                _, ext = os.path.splitext(fname)
+
+                template_data["representation"] = ext[1:]
+
+                src = os.path.join(stagingdir, fname)
+                dst = template_publish.format(**template_data)
+
+                copy(src, dst)
+
+                instance.data["output"].append(dst)
 
             representation = {
                 "schema": "avalon-core:representation-2.0",
                 "type": "representation",
                 "parent": version_id,
-                "name": ext[1:],
-                "data": {"label": representation_labels.get(ext)},
+                "name": template_data["representation"],
+                "data": {},
                 "dependencies": instance.data.get("dependencies", "").split(),
 
                 # Imprint shortcut to context for performance reasons.
@@ -186,7 +246,7 @@ class IntegrateAvalonAsset(pyblish.api.InstancePlugin):
                     "silo": SILO,
                     "subset": subset["name"],
                     "version": version["name"],
-                    "representation": representation
+                    "representation": template_data["representation"]
                 }
             }
 
