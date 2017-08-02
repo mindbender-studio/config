@@ -23,13 +23,12 @@ class LookLoader(avalon.maya.Loader):
                 raise
 
             self.log.info("Loading lookdev for the first time..")
-            with avalon.maya.maintained_selection():
-                nodes = cmds.file(
-                    self.fname,
-                    namespace=namespace,
-                    reference=True,
-                    returnNewNodes=True
-                )
+            nodes = cmds.file(
+                self.fname,
+                namespace=namespace,
+                reference=True,
+                returnNewNodes=True
+            )
         else:
             self.log.info("Reusing existing lookdev..")
             nodes = cmds.referenceQuery(existing_reference, nodes=True)

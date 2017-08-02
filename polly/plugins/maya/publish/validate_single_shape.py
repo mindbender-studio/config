@@ -8,7 +8,7 @@ class ValidateMindbenderSingleShape(pyblish.api.InstancePlugin):
 
     """
 
-    label = "Validate Single Shape"
+    label = "Single Shape"
     order = pyblish.api.ValidatorOrder
     hosts = ["maya"]
     families = [

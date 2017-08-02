@@ -79,25 +79,24 @@ class CurvesLoader(avalon.maya.Loader):
             "mapFile=",
         ])
 
-        with maya.maintained_selection():
-            cmds.select(
-                control_set,
-                replace=True,
+        cmds.select(
+            control_set,
+            replace=True,
 
-                # Support controllers being embedded in
-                # additional selection sets.
-                noExpand=False
-            )
+            # Support controllers being embedded in
+            # additional selection sets.
+            noExpand=False
+        )
 
-            nodes = cmds.file(
-                self.fname,
-                i=True,
-                type="atomImport",
-                renameAll=True,
-                namespace=namespace,
-                options=options,
-                returnNewNodes=True,
-            )
+        nodes = cmds.file(
+            self.fname,
+            i=True,
+            type="atomImport",
+            renameAll=True,
+            namespace=namespace,
+            options=options,
+            returnNewNodes=True,
+        )
 
         self[:] = nodes + cmds.sets(container, query=True) + [container]
 

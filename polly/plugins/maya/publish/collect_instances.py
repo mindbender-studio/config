@@ -7,26 +7,6 @@ class CollectMindbenderInstances(pyblish.api.ContextPlugin):
     This collector takes into account assets that are associated with
     an objectSet and marked with a unique identifier;
 
-    Identifier:
-        id (str): "pyblish.mindbender.instance"
-
-    Supported Families:
-        mindbender.model: Geometric representation of artwork
-        avalon.rig: An articulated model for animators.
-            A rig may contain a series of sets in which to identify
-            its contents.
-
-            - cache_SEL: Should contain cachable polygonal meshes
-            - controls_SEL: Should contain animatable controllers for animators
-            - resources_SEL: Should contain nodes that reference external files
-
-            Limitations:
-                - Only Maya is supported
-                - One (1) rig per scene file
-                - Unmanaged history, it is up to the TD to ensure
-                    history is up to par.
-        mindbender.animation: Pointcache of `avalon.rig`
-
     Limitations:
         - Does not take into account nodes connected to those
             within an objectSet. Extractors are assumed to export
@@ -36,7 +16,7 @@ class CollectMindbenderInstances(pyblish.api.ContextPlugin):
 
     """
 
-    label = "Mindbender Instances"
+    label = "Instances"
     order = pyblish.api.CollectorOrder
     hosts = ["maya"]
 

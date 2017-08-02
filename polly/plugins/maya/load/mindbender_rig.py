@@ -40,21 +40,20 @@ class RigLoader(avalon.maya.Loader):
             assert output, "No out_SET in rig, this is a bug."
             assert controls, "No controls_SET in rig, this is a bug."
 
-            with avalon.maya.maintained_selection():
-                cmds.select([output, controls], noExpand=True)
+            cmds.select([output, controls], noExpand=True)
 
-                dependencies = [context["representation"]["_id"]]
-                asset = context["asset"]["name"] + "_"
+            dependencies = [context["representation"]["_id"]]
+            asset = context["asset"]["name"] + "_"
 
-                avalon.maya.create(
-                    name=avalon.maya.unique_name(asset, suffix="_SET"),
+            avalon.maya.create(
+                name=avalon.maya.unique_name(asset, suffix="_SET"),
 
-                    # Publish to the currently set asset, and not the
-                    # asset from which the Rig was produced.
-                    asset=context["asset"],
+                # Publish to the currently set asset, and not the
+                # asset from which the Rig was produced.
+                asset=context["asset"]["name"],
 
-                    family="mindbender.animation",
-                    options={"useSelection": True},
-                    data={
-                        "dependencies": " ".join(str(d) for d in dependencies)
-                    })
+                family="mindbender.animation",
+                options={"useSelection": True},
+                data={
+                    "dependencies": " ".join(str(d) for d in dependencies)
+                })

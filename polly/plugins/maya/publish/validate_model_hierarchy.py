@@ -8,7 +8,7 @@ class ValidateMindbenderModelHierarchy(pyblish.api.InstancePlugin):
 
     """
 
-    label = "Validate Model Format"
+    label = "Model Format"
     order = pyblish.api.ValidatorOrder
     hosts = ["maya"]
     families = ["mindbender.model"]

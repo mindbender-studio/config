@@ -19,7 +19,7 @@ class ValidateMindbenderSingleAssembly(pyblish.api.InstancePlugin):
 
     """
 
-    label = "Validate Single Assembly"
+    label = "Single Assembly"
     order = pyblish.api.ValidatorOrder
     hosts = ["maya"]
     families = ["mindbender.model", "mindbender.rig"]

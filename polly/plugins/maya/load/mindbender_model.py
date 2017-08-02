@@ -13,18 +13,16 @@ class ModelLoader(avalon.maya.Loader):
 
     def process(self, name, namespace, context, data):
         from maya import cmds
-        with avalon.maya.maintained_selection():
-            nodes = cmds.file(
-                self.fname,
-                namespace=namespace,
-                reference=True,
-                returnNewNodes=True,
-                groupReference=True,
-                groupName=namespace + ":" + name
-            )
+
+        self[:] = cmds.file(
+            self.fname,
+            namespace=namespace,
+            reference=True,
+            returnNewNodes=True,
+            groupReference=True,
+            groupName=namespace + ":" + name
+        )
 
         # Assign default shader to meshes
-        meshes = cmds.ls(nodes, type="mesh")
+        meshes = cmds.ls(self, type="mesh")
         cmds.sets(meshes, forceElement="initialShadingGroup")
-
-        self[:] = nodes

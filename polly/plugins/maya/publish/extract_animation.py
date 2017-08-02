@@ -12,7 +12,7 @@ class ExtractMindbenderAnimation(pyblish.api.InstancePlugin):
 
     """
 
-    label = "Extract Mindbender Animation"
+    label = "Animation"
     order = pyblish.api.ExtractorOrder
     hosts = ["maya"]
     families = ["mindbender.animation"]

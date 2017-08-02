@@ -10,7 +10,7 @@ class ValidateMindbenderProjectEditInfo(pyblish.api.ContextPlugin):
     Supervisor with haste!
     """
 
-    label = "Validate Project Edit Info"
+    label = "Project Edit Info"
     optional = True
     order = pyblish.api.ValidatorOrder
     families = ["mindbender.animation"]
@@ -21,15 +21,15 @@ class ValidateMindbenderProjectEditInfo(pyblish.api.ContextPlugin):
         scene_in = cmds.playbackOptions(query=True, animationStartTime=True)
         scene_out = cmds.playbackOptions(query=True, animationEndTime=True)
         scene_fps = {
-                "12fps" : 12,
-                "game"  : 15,
-                "16fps" : 16,
-                "film"  : 24,
-                "pal"   : 25,
-                "ntsc"  : 30,
-                "show"  : 48,
-                "palf"  : 50,
-                "ntscf" : 60}.get(cmds.currentUnit(query=True, time=True))
+            "12fps": 12,
+            "game": 15,
+            "16fps": 16,
+            "film": 24,
+            "pal": 25,
+            "ntsc": 30,
+            "show": 48,
+            "palf": 50,
+            "ntscf": 60}.get(cmds.currentUnit(query=True, time=True))
 
         if scene_fps is None:
             scene_fps = "a strange "

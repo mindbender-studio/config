@@ -10,14 +10,13 @@ class HistoryLookLoader(avalon.maya.Loader):
     def process(self, name, namespace, context, data):
         from maya import cmds
 
-        with avalon.maya.maintained_selection():
-            nodes = cmds.file(
-                self.fname,
-                namespace=namespace,
-                reference=True,
-                returnNewNodes=True,
-                groupReference=True,
-                groupName=namespace + ":" + name
-            )
+        nodes = cmds.file(
+            self.fname,
+            namespace=namespace,
+            reference=True,
+            returnNewNodes=True,
+            groupReference=True,
+            groupName=namespace + ":" + name
+        )
 
         self[:] = nodes

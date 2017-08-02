@@ -10,7 +10,7 @@ class MindbenderExtractHistoryLookdev(pyblish.api.InstancePlugin):
 
     """
 
-    label = "Extract History Lookdev"
+    label = "History Lookdev"
     order = pyblish.api.ExtractorOrder
     hosts = ["maya"]
     families = ["mindbender.historyLookdev"]

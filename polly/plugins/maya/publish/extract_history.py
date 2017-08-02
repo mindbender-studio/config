@@ -2,7 +2,7 @@ import pyblish.api
 
 
 class ExtractMindbenderHistory(pyblish.api.InstancePlugin):
-    label = "Extract Mindbender History"
+    label = "History"
     order = pyblish.api.ExtractorOrder
     hosts = ["maya"]
     families = ["mindbender.animation"]
