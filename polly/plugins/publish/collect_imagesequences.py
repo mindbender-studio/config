@@ -10,6 +10,7 @@ class CollectMindbenderImageSequences(pyblish.api.ContextPlugin):
 
     def process(self, context):
         import os
+        import json
         from avalon.vendor import clique
 
         workspace = context.data["workspaceDir"]
@@ -23,16 +24,34 @@ class CollectMindbenderImageSequences(pyblish.api.ContextPlugin):
                 "There shouldn't have been a remainder for '%s': "
                 "%s" % (renderlayer, remainder))
 
+            # Maya 2017 compatibility, it inexplicably prefixes layers
+            # with "rs_" without warning.
+            compatpath = os.path.join(base, renderlayer.split("rs_", 1)[-1])
+
+            for fname in (abspath, compatpath):
+                try:
+                    with open(fname + ".json") as f:
+                        metadata = json.load(f)
+                    break
+
+                except OSError:
+                    continue
+
+            else:
+                raise Exception("%s was not published correctly "
+                                "(missing metadata)" % renderlayer)
+
             for collection in collections:
                 instance = context.create_instance(str(collection))
 
-                data = {
+                data = dict(metadata["instance"], **{
+                    "name": instance.name,
                     "family": "Image Sequences",
                     "families": ["mindbender.imagesequence"],
                     "subset": collection.head[:-1],
-                    "isSeries": True,
                     "stagingDir": os.path.join(workspace, renderlayer),
-                    "files": list(collection),
-                }
+                    "files": [list(collection)],
+                    "metadata": metadata
+                })
 
                 instance.data.update(data)

@@ -11,11 +11,8 @@ class ValidateMindbenderDeadlineDone(pyblish.api.InstancePlugin):
     optional = True
 
     def process(self, instance):
-        import os
-        import json
-
         from avalon import api
-        from avalon.vendor import requests, clique
+        from avalon.vendor import requests
 
         # From Deadline documentation
         # https://docs.thinkboxsoftware.com/products/deadline/8.0/
@@ -29,21 +26,9 @@ class ValidateMindbenderDeadlineDone(pyblish.api.InstancePlugin):
             6: "Pending",
         }
 
-        collection = clique.parse(instance.name)
-        context = instance.context
-        workspace = context.data["workspaceDir"]
-        metadata = os.path.join(workspace, collection.head + "json")
-
-        try:
-            with open(metadata) as f:
-                metadata = json.load(f)
-        except OSError:
-            raise Exception("%s was not published correctly "
-                            "(missing metadata)" % instance)
-
         url = api.Session["AVALON_DEADLINE"] + "/api/jobs?JobID=%s"
 
-        for job in metadata["jobs"]:
+        for job in instance.data["metadata"]["jobs"]:
             response = requests.get(url % job["_id"])
 
             if response.ok:
