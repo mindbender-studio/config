@@ -13,6 +13,7 @@ class RigLoader(avalon.maya.Loader):
 
     def process(self, name, namespace, context, data):
         from maya import cmds
+        from avalon import api
 
         nodes = cmds.file(self.fname,
                           namespace=namespace,
@@ -46,11 +47,11 @@ class RigLoader(avalon.maya.Loader):
             asset = context["asset"]["name"] + "_"
 
             avalon.maya.create(
-                name=avalon.maya.unique_name(asset, suffix="_SET"),
+                name=avalon.maya.unique_name(asset),
 
                 # Publish to the currently set asset, and not the
                 # asset from which the Rig was produced.
-                asset=context["asset"]["name"],
+                asset=api.Session["AVALON_ASSET"],
 
                 family="mindbender.animation",
                 options={"useSelection": True},
