@@ -53,7 +53,7 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
 
     def process(self, instance):
 
-        deadline = api.Session.get("AVALON_DEADLINE", "http://localhost:8082")
+        deadline = api.Session.get("AVALON_DEADLINE", None)
         assert deadline is not None, "Requires AVALON_DEADLINE"
 
         context = instance.context
