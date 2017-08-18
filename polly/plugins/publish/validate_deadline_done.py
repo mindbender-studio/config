@@ -38,7 +38,8 @@ class ValidateMindbenderDeadlineDone(pyblish.api.InstancePlugin):
             if response.ok:
                 data = response.json()
                 assert data, ValueError("Can't find information about "
-                                        "this Deadline job")
+                                        "this Deadline job: "
+                                        "{}".format(job["_id"]))
 
                 state = states.get(data[0]["Stat"])
                 if state in (None, "Unknown"):
