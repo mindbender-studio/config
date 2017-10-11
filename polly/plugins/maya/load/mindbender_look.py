@@ -37,9 +37,13 @@ class LookLoader(avalon.maya.Loader):
         # Assign shaders
         self.fname = self.fname.rsplit(".", 1)[0] + ".json"
 
+        # Expand $AVALON_PROJECT and friends, if used
+        self.fname = os.path.expandvars(self.fname)
+
         if not os.path.isfile(self.fname):
             self.log.warning("Look development asset "
-                             "has no relationship data.")
+                             "has no relationship data.\n"
+                             "%s was not found" % self.fname)
             return nodes
 
         with open(self.fname) as f:
