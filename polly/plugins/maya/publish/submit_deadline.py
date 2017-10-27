@@ -25,8 +25,10 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
         from avalon import api
         from avalon.vendor import requests
 
-        assert "AVALON_DEADLINE" in api.Session, ("Environment variable "
-                                                  "missing: 'AVALON_DEADLINE")
+        assert "AVALON_DEADLINE" in api.Session, (
+            "Environment variable missing: 'AVALON_DEADLINE"
+        )
+
         AVALON_DEADLINE = api.Session["AVALON_DEADLINE"]
 
         context = instance.context
