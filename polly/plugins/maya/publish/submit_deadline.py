@@ -25,7 +25,11 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
         from avalon import api
         from avalon.vendor import requests
 
-        assert api.Session["AVALON_DEADLINE"], "Requires AVALON_DEADLINE"
+        assert "AVALON_DEADLINE" in api.Session, (
+            "Environment variable missing: 'AVALON_DEADLINE"
+        )
+
+        AVALON_DEADLINE = api.Session["AVALON_DEADLINE"]
 
         context = instance.context
         workspace = context.data["workspaceDir"]
@@ -41,7 +45,7 @@ class MindbenderSubmitDeadline(pyblish.api.InstancePlugin):
             pass
 
         # E.g. http://192.168.0.1:8082/api/jobs
-        url = api.Session["AVALON_DEADLINE"] + "/api/jobs"
+        url = "{}/api/jobs?JobID=%s".format(AVALON_DEADLINE)
 
         # Documentation for keys available at:
         # https://docs.thinkboxsoftware.com
